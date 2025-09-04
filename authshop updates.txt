@@ -1,0 +1,117 @@
+# Complete Updates List - Auto Repair Shop P&L Specifications
+
+## REVENUE STRUCTURE
+
+### Service Bay Revenue
+- **21 working days per month**
+- **Starting with 2 bays**
+- **40% efficiency first month**
+- **Labor rate: $125/hour**
+- **4 hours average per ticket**
+- **$10,000 revenue target first month**
+- **Growth rates:**
+  - Good months: 30% increase
+  - Slow months: 15-20% growth
+- **Efficiency scaling:**
+  - 100% efficiency = $20,000/month per bay
+  - 50% efficiency = $10,000/month per bay
+- **Bay scaling rules:**
+  - Start with 2 bays
+  - Scale from 50% efficiency with 15% growth (configurable)
+  - When existing bays hit 100%, overflow goes to new bay (NOT reset to 50%)
+  - Add new tech with each new bay
+  - System must be configurable for number of bays active per month
+
+### Parts Revenue
+- **40% markup on all parts**
+- **70% of service sales generate parts sales**
+
+### Detail Department
+- **$20,000/month at 100% efficiency**
+- **$500/month for detail/cleaning supplies**
+
+### Used Car Sales
+- **5 cars first month**
+- **Average $3,000 profit per car = $15,000 first month**
+- **Growth: 15-20% normally, 30% if lucky**
+
+### Miscellaneous Income
+- **Extended Warranties:**
+  - 1 warranty in first month
+  - 4 extended warranties per month @ $1,000 each (after first month)
+- **Oil disposal:** $150/month
+- **Shop charge:** 7% of labor, capped at $60 per work order
+- **Disposal fees:** $200/month
+- **Battery disposal:** $825/month
+
+## EXPENSE STRUCTURE
+
+### Labor Costs
+- **1 Tech at $60,000/year** (higher rate senior tech)
+- **2 Techs at $45,000/year each** (lower rate, scales with bay additions)
+- **1 Service Advisor (Nick) at $70,000/year**
+- **1 Manager (Josh) at $100,000/year + $10,000 bonus**
+
+### Operating Expenses
+- **Advertising:** $1,500/month
+- **Software:**
+  - ShopKey/Snap-on: $300/month
+  - Payment processing: PayPal Zettle 2.29% + 9¢ per transaction
+- **Equipment:**
+  - 1 laptop per tech
+  - 2 desktop computers upfront
+  - Scan tool: $2,500 (one-time)
+- **Memberships/Services:**
+  - AAA signup: $400/year
+  - Fuel card: $400/month
+- **Utilities:** $1,200/month
+- **Insurance/Bonds:**
+  - Surety bond: $20/month
+  - General liability: $200/month
+
+### Inventory/Supplies
+- **Tire inventory:**
+  - $10,000 initial setup cost
+  - $15,000/month rotating inventory
+  - 5-6 sets of tires per day
+  - Tires cost $200, charge $800 per car
+- **Waste disposal:**
+  - Waste oil filters: $300 every 6 months
+  - Coolant: $300 every 6 months
+- **Shop supplies:**
+  - Oil, cabin filters ($15), air filters, wipers, filters
+  - Detail supplies: $250-500/month (specified as $500)
+  - Random shop charges: $1,000/month
+
+### Parts Cost
+- **70% of service revenue generates parts cost** (before markup)
+
+## OPERATIONAL METRICS
+
+### Efficiency Targets
+- **5 cars per day per lift at 100% efficiency**
+- **8 hours operation**
+- **1.6 hours per ticket**
+- **44 work orders** (to be verified)
+- **Average work order: $300**
+- **220 cars per month target**
+
+### Scaling Logic
+- **Starting point:** 2 bays at 40% efficiency
+- **Growth:** 15% monthly from 50% efficiency (configurable)
+- **Scaling trigger:** Add bay when demand exceeds current capacity
+- **Important:** When at 100% efficiency, existing bays stay at 100%, overflow goes to new bay
+
+## KEY REQUIREMENTS
+1. **Must be configurable for amount of bays active per month**
+2. **All calculations must be dynamic based on efficiency and bay count**
+3. **Payment processing must calculate based on actual transactions**
+4. **Tech hiring scales with bay additions**
+5. **No random expenses or income not explicitly mentioned should be included**
+6. **Export to CSV functionality required**
+7. **Visual dashboard showing bay scaling events**
+
+## CLARIFICATIONS MADE
+- Payment processor = PayPal Zettle at 2.29% + 9¢
+- Tire costs are just costs, profits already in bay revenue
+- Used car sales growth is randomized between 15-20% (30% if lucky)

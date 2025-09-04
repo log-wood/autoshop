@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)",
+      "Read(/E:\\code\\autoshop/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
