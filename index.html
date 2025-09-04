@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Repair Shop P&L Projections - Dynamic Bay Scaling</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Auto Repair Shop P&L Projections</h1>
+            <p>12-Month Financial Forecast with Dynamic Bay Scaling</p>
+        </div>
+
+        <div class="controls">
+            <!-- Bay & Efficiency Configuration -->
+            <div class="config-section" id="bayEfficiencyConfig">
+                <div class="config-section-header">
+                    <span>Bay & Efficiency Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="startingBays">Starting Bays</label>
+                            <input type="number" id="startingBays" min="1" max="10" value="2">
+                        </div>
+                        <div class="control-group">
+                            <label for="maxBays">Max Bays</label>
+                            <input type="number" id="maxBays" min="1" max="20" value="6">
+                        </div>
+                        <div class="control-group">
+                            <label for="startingEfficiency">Starting Efficiency (%)</label>
+                            <input type="number" id="startingEfficiency" min="0" max="100" value="40">
+                        </div>
+                        <div class="control-group">
+                            <label for="growthRate">Monthly Growth Rate (%)</label>
+                            <input type="number" id="growthRate" min="0" max="100" value="20">
+                        </div>
+                        <div class="control-group">
+                            <label for="bayTrigger">Bay Addition Trigger (%)</label>
+                            <input type="number" id="bayTrigger" min="50" max="100" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="newBayResetEfficiency">New Bay Starting Efficiency (%)</label>
+                            <input type="number" id="newBayResetEfficiency" min="0" max="100" value="50">
+                        </div>
+                        <div class="control-group">
+                            <label for="maxRevenuePerBay">Max Revenue per Bay</label>
+                            <input type="number" id="maxRevenuePerBay" min="0" step="1000" value="20000">
+                        </div>
+                        <div class="control-group">
+                            <label for="detailEfficiencyMultiplier">Detail Efficiency Multiplier</label>
+                            <input type="number" id="detailEfficiencyMultiplier" min="0" max="5" step="0.1" value="1.2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Configuration -->
+            <div class="config-section collapsed" id="serviceConfig">
+                <div class="config-section-header">
+                    <span>Service Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="laborRate">Labor Rate ($/hour)</label>
+                            <input type="number" id="laborRate" min="0" step="5" value="125">
+                        </div>
+                        <div class="control-group">
+                            <label for="workingDays">Working Days/Month</label>
+                            <input type="number" id="workingDays" min="1" max="31" value="21">
+                        </div>
+                        <div class="control-group">
+                            <label for="hoursPerTicket">Hours per Ticket</label>
+                            <input type="number" id="hoursPerTicket" min="0.1" max="10" step="0.1" value="1.6">
+                        </div>
+                        <div class="control-group">
+                            <label for="operatingHoursPerDay">Operating Hours/Day</label>
+                            <input type="number" id="operatingHoursPerDay" min="1" max="24" value="8">
+                        </div>
+                        <div class="control-group">
+                            <label for="carsPerDayPerLift">Cars per Day per Lift</label>
+                            <input type="number" id="carsPerDayPerLift" min="0" max="20" value="5">
+                        </div>
+                        <div class="control-group">
+                            <label for="shopChargePercent">Shop Charge (%)</label>
+                            <input type="number" id="shopChargePercent" min="0" max="20" step="0.1" value="7">
+                        </div>
+                        <div class="control-group">
+                            <label for="shopChargeCap">Shop Charge Cap ($)</label>
+                            <input type="number" id="shopChargeCap" min="0" step="5" value="60">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parts & Inventory Configuration -->
+            <div class="config-section collapsed" id="partsConfig">
+                <div class="config-section-header">
+                    <span>Parts & Inventory Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="partsMarkup">Parts Markup (%)</label>
+                            <input type="number" id="partsMarkup" min="0" max="200" value="40">
+                        </div>
+                        <div class="control-group">
+                            <label for="serviceToPartsPercent">Service to Parts (%)</label>
+                            <input type="number" id="serviceToPartsPercent" min="0" max="100" value="70">
+                        </div>
+                        <div class="control-group">
+                            <label for="initialTireInventory">Initial Tire Inventory</label>
+                            <input type="number" id="initialTireInventory" min="0" step="1000" value="10000">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyTireInventory">Monthly Tire Inventory</label>
+                            <input type="number" id="monthlyTireInventory" min="0" step="1000" value="15000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Stream Configuration -->
+            <div class="config-section collapsed" id="revenueConfig">
+                <div class="config-section-header">
+                    <span>Revenue Stream Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="detailMaxRevenue">Detail Max Revenue</label>
+                            <input type="number" id="detailMaxRevenue" min="0" step="1000" value="20000">
+                        </div>
+                        <div class="control-group">
+                            <label for="initialUsedCars">Initial Used Cars</label>
+                            <input type="number" id="initialUsedCars" min="0" value="5">
+                        </div>
+                        <div class="control-group">
+                            <label for="profitPerUsedCar">Profit per Used Car</label>
+                            <input type="number" id="profitPerUsedCar" min="0" step="500" value="3000">
+                        </div>
+                        <div class="control-group">
+                            <label for="usedCarGrowthPercent">Used Car Growth (%)</label>
+                            <input type="number" id="usedCarGrowthPercent" min="0" max="100" value="15">
+                        </div>
+                        <div class="control-group">
+                            <label for="firstMonthWarranties">First Month Warranties</label>
+                            <input type="number" id="firstMonthWarranties" min="0" value="1">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyWarrantiesAfter">Monthly Warranties After</label>
+                            <input type="number" id="monthlyWarrantiesAfter" min="0" value="4">
+                        </div>
+                        <div class="control-group">
+                            <label for="warrantyPrice">Warranty Price</label>
+                            <input type="number" id="warrantyPrice" min="0" step="100" value="1000">
+                        </div>
+                        <div class="control-group">
+                            <label for="oilDisposalFee">Oil Disposal Fee</label>
+                            <input type="number" id="oilDisposalFee" min="0" step="10" value="150">
+                        </div>
+                        <div class="control-group">
+                            <label for="generalDisposalFee">General Disposal Fee</label>
+                            <input type="number" id="generalDisposalFee" min="0" step="10" value="200">
+                        </div>
+                        <div class="control-group">
+                            <label for="batteryDisposalFee">Battery Disposal Fee</label>
+                            <input type="number" id="batteryDisposalFee" min="0" step="10" value="825">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Staff Salaries Configuration -->
+            <div class="config-section collapsed" id="staffConfig">
+                <div class="config-section-header">
+                    <span>Staff Salaries Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="seniorTechAnnualSalary">Senior Tech Annual Salary</label>
+                            <input type="number" id="seniorTechAnnualSalary" min="0" step="5000" value="60000">
+                        </div>
+                        <div class="control-group">
+                            <label for="juniorTechAnnualSalary">Junior Tech Annual Salary</label>
+                            <input type="number" id="juniorTechAnnualSalary" min="0" step="5000" value="45000">
+                        </div>
+                        <div class="control-group">
+                            <label for="serviceAdvisorAnnualSalary">Service Advisor Annual Salary</label>
+                            <input type="number" id="serviceAdvisorAnnualSalary" min="0" step="5000" value="70000">
+                        </div>
+                        <div class="control-group">
+                            <label for="managerAnnualSalary">Manager Annual Salary</label>
+                            <input type="number" id="managerAnnualSalary" min="0" step="5000" value="100000">
+                        </div>
+                        <div class="control-group">
+                            <label for="managerAnnualBonus">Manager Annual Bonus</label>
+                            <input type="number" id="managerAnnualBonus" min="0" step="1000" value="10000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operating Expenses Configuration -->
+            <div class="config-section collapsed" id="operatingConfig">
+                <div class="config-section-header">
+                    <span>Operating Expenses Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="monthlyAdvertising">Monthly Advertising</label>
+                            <input type="number" id="monthlyAdvertising" min="0" step="100" value="1500">
+                        </div>
+                        <div class="control-group">
+                            <label for="shopKeySoftwareMonthly">ShopKey Software Monthly</label>
+                            <input type="number" id="shopKeySoftwareMonthly" min="0" step="50" value="300">
+                        </div>
+                        <div class="control-group">
+                            <label for="paymentProcessingPercent">Payment Processing (%)</label>
+                            <input type="number" id="paymentProcessingPercent" min="0" max="10" step="0.01" value="2.29">
+                        </div>
+                        <div class="control-group">
+                            <label for="paymentProcessingPerTransaction">Payment Processing per Transaction</label>
+                            <input type="number" id="paymentProcessingPerTransaction" min="0" max="1" step="0.01" value="0.09">
+                        </div>
+                        <div class="control-group">
+                            <label for="aaaAnnualMembership">AAA Annual Membership</label>
+                            <input type="number" id="aaaAnnualMembership" min="0" step="50" value="400">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyFuelCard">Monthly Fuel Card</label>
+                            <input type="number" id="monthlyFuelCard" min="0" step="50" value="400">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyUtilities">Monthly Utilities</label>
+                            <input type="number" id="monthlyUtilities" min="0" step="100" value="1200">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlySuretyBond">Monthly Surety Bond</label>
+                            <input type="number" id="monthlySuretyBond" min="0" step="10" value="20">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyGeneralLiability">Monthly General Liability</label>
+                            <input type="number" id="monthlyGeneralLiability" min="0" step="50" value="200">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment & Supplies Configuration -->
+            <div class="config-section collapsed" id="equipmentConfig">
+                <div class="config-section-header">
+                    <span>Equipment & Supplies Configuration</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="laptopCostEach">Laptop Cost Each</label>
+                            <input type="number" id="laptopCostEach" min="0" step="100" value="1500">
+                        </div>
+                        <div class="control-group">
+                            <label for="desktopCostEach">Desktop Cost Each</label>
+                            <input type="number" id="desktopCostEach" min="0" step="100" value="2000">
+                        </div>
+                        <div class="control-group">
+                            <label for="numberOfDesktops">Number of Desktops</label>
+                            <input type="number" id="numberOfDesktops" min="0" value="2">
+                        </div>
+                        <div class="control-group">
+                            <label for="scanToolCost">Scan Tool Cost</label>
+                            <input type="number" id="scanToolCost" min="0" step="100" value="2500">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyDetailSupplies">Monthly Detail Supplies</label>
+                            <input type="number" id="monthlyDetailSupplies" min="0" step="50" value="500">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyShopSupplies">Monthly Shop Supplies</label>
+                            <input type="number" id="monthlyShopSupplies" min="0" step="100" value="1000">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthlyOilCostPerLift">Monthly Oil Cost per Lift</label>
+                            <input type="number" id="monthlyOilCostPerLift" min="0" step="100" value="2500">
+                        </div>
+                        <div class="control-group">
+                            <label for="wasteOilFiltersCost">Waste Oil Filters Cost</label>
+                            <input type="number" id="wasteOilFiltersCost" min="0" step="50" value="300">
+                        </div>
+                        <div class="control-group">
+                            <label for="coolantDisposalCost">Coolant Disposal Cost</label>
+                            <input type="number" id="coolantDisposalCost" min="0" step="50" value="300">
+                        </div>
+                        <div class="control-group">
+                            <label for="wasteDisposalFrequencyMonths">Waste Disposal Frequency (months)</label>
+                            <input type="number" id="wasteDisposalFrequencyMonths" min="1" max="12" value="6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculation Rules & Formulas -->
+            <div class="config-section collapsed" id="formulasConfig">
+                <div class="config-section-header">
+                    <span>Calculation Rules & Formulas</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="partsGenerationFormula">Parts Generation Formula</label>
+                            <select id="partsGenerationFormula">
+                                <option value="percentOfService">% of Service Revenue</option>
+                                <option value="fixedAmount">Fixed per Bay</option>
+                                <option value="perWorkOrder">Per Work Order</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="partsGenerationModifier">Parts Generation Modifier</label>
+                            <input type="number" id="partsGenerationModifier" min="0" max="5" step="0.1" value="1.0">
+                        </div>
+                        <div class="control-group">
+                            <label for="shopChargeFormula">Shop Charge Formula</label>
+                            <select id="shopChargeFormula">
+                                <option value="minOfPercentOrCap">Min of % or Cap</option>
+                                <option value="percentOnly">Percent Only</option>
+                                <option value="perOrderOnly">Per Order Only</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="workOrderFormula">Work Order Formula</label>
+                            <select id="workOrderFormula">
+                                <option value="revenuePerTicket">Revenue / Avg Ticket</option>
+                                <option value="carsTimesEfficiency">Cars × Efficiency</option>
+                                <option value="fixed">Fixed Amount</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="workOrdersFixed">Fixed Work Orders</label>
+                            <input type="number" id="workOrdersFixed" min="0" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="techSalaryFormula">Tech Salary Formula</label>
+                            <select id="techSalaryFormula">
+                                <option value="seniorPlusJuniors">Senior + Juniors</option>
+                                <option value="allEqual">All Equal</option>
+                                <option value="perBay">Per Bay</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="techSalaryPerBay">Tech Salary per Bay</label>
+                            <input type="number" id="techSalaryPerBay" min="0" step="5000" value="50000">
+                        </div>
+                        <div class="control-group">
+                            <label for="oilCostFormula">Oil Cost Formula</label>
+                            <select id="oilCostFormula">
+                                <option value="perBay">Per Bay</option>
+                                <option value="percentOfRevenue">% of Revenue</option>
+                                <option value="perWorkOrder">Per Work Order</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="oilCostPercent">Oil Cost %</label>
+                            <input type="number" id="oilCostPercent" min="0" max="20" step="0.5" value="5">
+                        </div>
+                        <div class="control-group">
+                            <label for="oilCostPerOrder">Oil Cost per Order</label>
+                            <input type="number" id="oilCostPerOrder" min="0" step="10" value="50">
+                        </div>
+                        <div class="control-group">
+                            <label for="paymentProcessFormula">Payment Process Formula</label>
+                            <select id="paymentProcessFormula">
+                                <option value="percentPlusTransaction">% + Transaction Fee</option>
+                                <option value="percentOnly">Percent Only</option>
+                                <option value="flatRate">Flat Rate</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="paymentProcessFlatRate">Payment Process Flat Rate</label>
+                            <input type="number" id="paymentProcessFlatRate" min="0" step="100" value="1000">
+                        </div>
+                        <div class="control-group">
+                            <label for="detailEfficiencyLink">Detail Efficiency Link</label>
+                            <select id="detailEfficiencyLink">
+                                <option value="serviceEfficiency">Service Efficiency</option>
+                                <option value="independent">Independent</option>
+                                <option value="fixed">Fixed</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="detailEfficiencyFormula">Detail Efficiency Formula</label>
+                            <select id="detailEfficiencyFormula">
+                                <option value="multiplier">Multiplier</option>
+                                <option value="addition">Addition</option>
+                                <option value="direct">Direct</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="detailEfficiencyAddition">Detail Efficiency Addition</label>
+                            <input type="number" id="detailEfficiencyAddition" min="0" max="100" value="20">
+                        </div>
+                        <div class="control-group">
+                            <label for="detailEfficiencyFixed">Detail Efficiency Fixed</label>
+                            <input type="number" id="detailEfficiencyFixed" min="0" max="100" value="80">
+                        </div>
+                        <div class="control-group">
+                            <label for="newBayEfficiencySource">New Bay Efficiency Source</label>
+                            <select id="newBayEfficiencySource">
+                                <option value="fixed">Fixed</option>
+                                <option value="percentOfCurrent">% of Current</option>
+                                <option value="overflow">Overflow Only</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="newBayEfficiencyPercent">New Bay Efficiency %</label>
+                            <input type="number" id="newBayEfficiencyPercent" min="0" max="100" value="80">
+                        </div>
+                        <div class="control-group">
+                            <label for="usedCarGrowthFormula">Used Car Growth Formula</label>
+                            <select id="usedCarGrowthFormula">
+                                <option value="fixed">Fixed</option>
+                                <option value="randomRange">Random Range</option>
+                                <option value="exponential">Exponential</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="usedCarFixedGrowth">Used Car Fixed Growth %</label>
+                            <input type="number" id="usedCarFixedGrowth" min="0" max="100" value="15">
+                        </div>
+                        <div class="control-group">
+                            <label for="usedCarExponentialBase">Used Car Exponential Base</label>
+                            <input type="number" id="usedCarExponentialBase" min="1" max="2" step="0.01" value="1.15">
+                        </div>
+                        <div class="control-group">
+                            <label for="efficiencyGrowthFormula">Efficiency Growth Formula</label>
+                            <select id="efficiencyGrowthFormula">
+                                <option value="linear">Linear</option>
+                                <option value="exponential">Exponential</option>
+                                <option value="sCurve">S-Curve</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="efficiencyExponentialRate">Efficiency Exponential Rate</label>
+                            <input type="number" id="efficiencyExponentialRate" min="1" max="2" step="0.01" value="1.1">
+                        </div>
+                        <div class="control-group">
+                            <label for="efficiencySCurveMidpoint">Efficiency S-Curve Midpoint</label>
+                            <input type="number" id="efficiencySCurveMidpoint" min="1" max="12" value="6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button class="btn" id="generateBtn">Generate Projections</button>
+            <button class="btn" id="resetBtn">Reset to Defaults</button>
+            <button class="btn" id="exportBtn">Export to CSV</button>
+            <button class="btn" id="saveConfigBtn">Save Configuration</button>
+            <button class="btn" id="loadConfigBtn">Load Configuration</button>
+            <input type="file" id="configFileInput" accept=".json" style="display: none;">
+        </div>
+
+        <div class="metrics-grid" id="metricsGrid">
+            <!-- Metrics will be generated here -->
+        </div>
+
+        <div class="bay-info" id="bayInfo">
+            <!-- Bay information will be displayed here -->
+        </div>
+
+        <div class="summary-cards" id="summaryCards">
+            <!-- Summary cards will be generated here -->
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <tbody id="plTable">
+                    <!-- Table will be generated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
