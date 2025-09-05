@@ -1,117 +1,211 @@
 # Complete Updates List - Auto Repair Shop P&L Specifications
 
-## REVENUE STRUCTURE
+## MAJOR SYSTEM ENHANCEMENTS IMPLEMENTED
+
+### New Comprehensive Initial Investment System
+- **Complete startup cost breakdown with 15+ categories**
+- **Configurable equipment quantities and unit costs**
+- **Starting cash position calculation based on total investment**
+
+### Enhanced Detail Department System
+- **Independent worker scaling (1-3 workers configurable)**
+- **Detail worker efficiency growth separate from service bays**
+- **Detail commission system (40% configurable)**
+- **Detail hourly rates ($15/hour configurable)**
+
+### Advanced Payroll Tax System
+- **Workers Compensation: 0.69% of payroll**
+- **Social Security: 6.2% with $160,200 annual cap per employee**
+- **Medicare: 1.45% on all wages**
+- **FUTA: 0.6% on first $7,000 per employee**
+- **Complete tax compliance calculations**
+
+### Interactive Formulas Documentation System
+- **New formulas.html page with live calculations**
+- **Real-time formula examples using current configuration**
+- **Comprehensive business logic documentation**
+
+## INITIAL STARTUP COSTS (New System)
+
+### Equipment & Infrastructure
+- **Initial Cash Position:** $20,000 (working capital)
+- **Scan Tool Equipment:** $2,500
+- **Vehicle Lifts:** 4 units × $2,500 each = $10,000
+- **Tire Balance & Mounting Machine:** $3,000
+- **Air Compressor System:** $1,500
+- **Workbenches & Shelving:** $2,000
+- **Oil & Coolant Management:** $2,000
+
+### Technology Equipment
+- **Laptops:** 2 units × $500 each = $1,000
+- **Desktop Computers:** 2 units × $1,000 each = $2,000
+
+### Mobile Detail Operations
+- **Mobile Detail Van:** $5,000
+- **Detail Equipment & Supplies:** $1,500
+
+### Business Setup
+- **Marketing & Signage:** $3,000
+- **Licenses & Permits:** $1,000
+- **Insurance Deposits:** $1,000
+
+### **Total Initial Investment:** ~$52,500
+
+## REVENUE STRUCTURE (Enhanced)
 
 ### Service Bay Revenue
-- **21 working days per month**
-- **Starting with 2 bays**
-- **40% efficiency first month**
-- **Labor rate: $125/hour**
-- **4 hours average per ticket**
-- **$10,000 revenue target first month**
-- **Growth rates:**
-  - Good months: 30% increase
-  - Slow months: 15-20% growth
-- **Efficiency scaling:**
-  - 100% efficiency = $20,000/month per bay
-  - 50% efficiency = $10,000/month per bay
-- **Bay scaling rules:**
-  - Start with 2 bays
-  - Scale from 50% efficiency with 15% growth (configurable)
-  - When existing bays hit 100%, overflow goes to new bay (NOT reset to 50%)
-  - Add new tech with each new bay
-  - System must be configurable for number of bays active per month
+- **21 working days per month** (configurable)
+- **Starting with 2 bays** (1-10 configurable)
+- **40% efficiency first month** (0-100% configurable)
+- **Labor rate: $125/hour** (configurable)
+- **1.6 hours average per ticket** (0.1-10 hours configurable)
+- **8 operating hours per day** (1-24 configurable)
+- **20% monthly growth rate** (0-100% configurable)
+- **Max 6 bays** (1-20 configurable)
 
 ### Parts Revenue
-- **40% markup on all parts**
-- **70% of service sales generate parts sales**
+- **70% of service revenue generates parts sales** (0-200% configurable)
 
-### Detail Department
-- **$20,000/month at 100% efficiency**
-- **$500/month for detail/cleaning supplies**
+### Detail Department (Enhanced System)
+- **1 starting detail worker** (1-3 configurable)
+- **40% starting efficiency** (0-100% configurable)
+- **20% monthly growth rate** (0-100% configurable)
+- **$15/hour worker rate** ($10-30 configurable)
+- **40% commission on detail revenue** (0-100% configurable)
+- **Max 3 detail workers** (1-5 configurable)
 
 ### Used Car Sales
-- **5 cars first month**
-- **Average $3,000 profit per car = $15,000 first month**
-- **Growth: 15-20% normally, 30% if lucky**
+- **2 initial used cars** (configurable)
+- **$3,000 profit per car** (configurable)
+- **5% monthly growth** (0-100% configurable)
 
-### Miscellaneous Income
-- **Extended Warranties:**
-  - 1 warranty in first month
-  - 4 extended warranties per month @ $1,000 each (after first month)
-- **Oil disposal:** $150/month
-- **Shop charge:** 7% of labor, capped at $60 per work order
-- **Disposal fees:** $200/month
-- **Battery disposal:** $825/month
+### Revenue Streams
+- **Shop Charge:** 7% of service revenue, capped at $60 per work order
+- **Warranties:** 1% of work orders @ $1,000 each
+- **Oil Disposal:** $150/month (scales with efficiency)
+- **General Disposal:** $200/month (scales with efficiency)
+- **Battery Disposal:** $825/month (scales with efficiency)
 
-## EXPENSE STRUCTURE
+## EXPENSE STRUCTURE (Comprehensive Overhaul)
 
-### Labor Costs
-- **1 Tech at $60,000/year** (higher rate senior tech)
-- **2 Techs at $45,000/year each** (lower rate, scales with bay additions)
-- **1 Service Advisor (Nick) at $70,000/year**
-- **1 Manager (Josh) at $100,000/year + $10,000 bonus**
+### Labor Costs (Enhanced System)
+- **1 Senior Tech:** $60,000/year (configurable)
+- **Additional Junior Techs:** $45,000/year each (scales with bay additions)
+- **Tech Bonuses:** $3,000/year per tech (configurable)
+- **1 Service Advisor:** $70,000/year (configurable)
+- **1 Manager:** $100,000/year (configurable)
+- **Detail Workers:** Scale from 1-3 workers based on efficiency
 
-### Operating Expenses
-- **Advertising:** $1,500/month
-- **Software:**
-  - ShopKey/Snap-on: $300/month
-  - Payment processing: PayPal Zettle 2.29% + 9¢ per transaction
-- **Equipment:**
-  - 1 laptop per tech
-  - 2 desktop computers upfront
-  - Scan tool: $2,500 (one-time)
-- **Memberships/Services:**
-  - AAA signup: $400/year
-  - Fuel card: $400/month
-- **Utilities:** $1,200/month
-- **Insurance/Bonds:**
-  - Surety bond: $20/month
-  - General liability: $200/month
+### Detail Department Labor
+- **Base Detail Workers:** Start with 1, scale to max 3
+- **Detail Salary:** Calculated from $15/hour × 8 hours × 21 days × 12 months
+- **Detail Commission:** 40% of detail revenue (configurable)
 
-### Inventory/Supplies
-- **Tire inventory:**
-  - $10,000 initial setup cost
-  - $15,000/month rotating inventory
-  - 5-6 sets of tires per day
-  - Tires cost $200, charge $800 per car
-- **Waste disposal:**
-  - Waste oil filters: $300 every 6 months
-  - Coolant: $300 every 6 months
-- **Shop supplies:**
-  - Oil, cabin filters ($15), air filters, wipers, filters
-  - Detail supplies: $250-500/month (specified as $500)
-  - Random shop charges: $1,000/month
+### Advanced Payroll Taxes (New System)
+- **Workers Compensation:** 0.69% of total payroll
+- **Social Security:** 6.2% with $160,200 annual cap per employee
+- **Medicare:** 1.45% on all wages (no cap)
+- **FUTA:** 0.6% on first $7,000 per employee annually
 
-### Parts Cost
-- **70% of service revenue generates parts cost** (before markup)
+### Operating Expenses (Enhanced)
+- **Advertising:** 2.5% of total revenue (configurable)
+- **ShopKey Software:** $300/month (configurable)
+- **Payment Processing:** 2.29% + $0.09 per transaction (configurable)
+- **AAA Membership:** $400/year (configurable)
+- **Fuel Card:** $400/month (configurable)
+- **Utilities:** $1,200/month (configurable)
+- **Surety Bond:** $20/month (configurable)
+- **General Liability:** $200/month (configurable)
 
-## OPERATIONAL METRICS
+### Variable Operating Costs (Efficiency-Based)
+- **Monthly Oil Costs:** $2,500 per lift scaled by efficiency
+- **Shop Supplies:** $250 per lift scaled by efficiency
+- **Detail Supplies:** $500/month fixed (configurable)
 
-### Efficiency Targets
+### Periodic Disposal Costs
+- **Waste Oil Filters:** $300 every 6 months
+- **Coolant Disposal:** $300 every 6 months
+- **Disposal Frequency:** Every 6 months (configurable)
+
+## OPERATIONAL METRICS (Updated)
+
+### Service Department Targets
 - **5 cars per day per lift at 100% efficiency**
-- **8 hours operation**
-- **1.6 hours per ticket**
-- **44 work orders** (to be verified)
-- **Average work order: $300**
-- **220 cars per month target**
+- **8 operating hours per day** (configurable 1-24)
+- **1.6 hours per ticket** (configurable 0.1-10)
+- **Work orders calculated:** Service Revenue ÷ (Labor Rate × Hours per Ticket)
+- **Service revenue scales with total efficiency**
 
-### Scaling Logic
-- **Starting point:** 2 bays at 40% efficiency
-- **Growth:** 15% monthly from 50% efficiency (configurable)
-- **Scaling trigger:** Add bay when demand exceeds current capacity
-- **Important:** When at 100% efficiency, existing bays stay at 100%, overflow goes to new bay
+### Detail Department Targets
+- **Detail efficiency scales independently from service bays**
+- **Detail workers scale based on detail department efficiency overflow**
+- **Detail revenue:** Worker Rate × Operating Hours × Working Days × (Total Detail Efficiency ÷ 100)**
 
-## KEY REQUIREMENTS
-1. **Must be configurable for amount of bays active per month**
-2. **All calculations must be dynamic based on efficiency and bay count**
-3. **Payment processing must calculate based on actual transactions**
-4. **Tech hiring scales with bay additions**
-5. **No random expenses or income not explicitly mentioned should be included**
-6. **Export to CSV functionality required**
-7. **Visual dashboard showing bay scaling events**
+### Bay & Worker Scaling Logic
+- **Service Bays:** Start 2 bays, max 6 bays (configurable)
+- **Growth:** 20% monthly efficiency growth (configurable)
+- **Bay Addition:** When total efficiency ≥ (current bay count × 100%)
+- **Tech Scaling:** 1 tech per bay (1 senior + junior techs)
+- **Detail Scaling:** Add detail worker when detail efficiency ≥ (current worker count × 100%)
 
-## CLARIFICATIONS MADE
-- Payment processor = PayPal Zettle at 2.29% + 9¢
-- Tire costs are just costs, profits already in bay revenue
-- Used car sales growth is randomized between 15-20% (30% if lucky)
+## ADVANCED FEATURES IMPLEMENTED
+
+### Configuration Management System
+- **15+ Configuration Sections:** All collapsible/expandable
+- **100+ Configurable Variables:** From startup costs to tax rates
+- **Save/Load Configuration:** JSON export/import functionality
+- **Reset to Defaults:** One-click configuration reset
+
+### Interactive Documentation
+- **formulas.html:** Comprehensive calculation documentation
+- **Live Examples:** Real-time formula calculations using current config
+- **Business Logic Explanations:** Step-by-step calculation breakdowns
+
+### Financial Calculation Enhancements
+- **3-Year Projections:** Extended from 12 months to 36 months
+- **Starting Cash Calculation:** Based on total initial investment
+- **Complex Payroll Taxes:** Full compliance calculations
+- **Multi-Department Scaling:** Independent service and detail scaling
+- **Revenue-Based Expenses:** Advertising scales with revenue
+
+### User Interface Improvements
+- **Year Tabs:** View Year 1, Year 2, Year 3, or 3-Year Summary
+- **Collapsible Sections:** Organized configuration management
+- **Real-time Updates:** All calculations update immediately
+- **Export Functionality:** Complete CSV export of all 36 months
+
+## TECHNICAL IMPLEMENTATION DETAILS
+
+### New Configuration Variables Added
+- **Initial Investment:** 15 startup cost categories
+- **Detail Department:** 6 new detail-specific variables
+- **Payroll Taxes:** 8 tax rate and cap variables
+- **Operating Expenses:** Revenue-based vs. fixed expense categorization
+- **Scaling Parameters:** Independent bay and detail worker scaling
+- **Formula Selection:** Configurable payment processing formulas
+
+### Calculation Engine Improvements
+- **Bay Efficiency Management:** Complex overflow and scaling logic
+- **Detail Department Integration:** Separate efficiency tracking
+- **Tax Compliance:** Multi-tier tax calculations with caps
+- **Cash Flow Tracking:** 3-year cash position projections
+- **Revenue Optimization:** Multiple revenue stream calculations
+
+## KEY REQUIREMENTS (Updated)
+1. ✅ **Configurable bay count per month with dynamic scaling**
+2. ✅ **All calculations dynamic based on efficiency and counts**
+3. ✅ **Payment processing with actual transaction calculations**
+4. ✅ **Tech and detail worker scaling with additions**
+5. ✅ **No random expenses - all explicitly configured**
+6. ✅ **Enhanced CSV export with 36-month projections**
+7. ✅ **Visual dashboard with scaling event indicators**
+8. ✅ **3-year financial projections with yearly summaries**
+9. ✅ **Complete payroll tax compliance calculations**
+10. ✅ **Interactive formula documentation system**
+
+## SYSTEM CAPABILITIES
+- **100% Web-Based:** Runs directly from file:// - no server required
+- **Complete Business Model:** From startup costs to 3-year projections
+- **Full Configurability:** Every business parameter is user-adjustable
+- **Professional Output:** CSV exports suitable for business planning
+- **Educational Value:** Live formula examples for learning business calculations

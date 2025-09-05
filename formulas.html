@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation Formulas - Auto Repair Shop P&L</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Calculation Formulas Reference</h1>
+            <p>Complete breakdown of every calculation used in the P&L projections</p>
+            <div class="nav-links">
+                <a href="index.html" class="btn btn-primary">← Back to Projections</a>
+            </div>
+        </div>
+
+        <div class="formulas-content">
+            <!-- Initial Investment Section -->
+            <div class="formula-section">
+                <h2>Initial Investment</h2>
+                <div class="formula-card">
+                    <h3>Total Initial Investment</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Total Initial Investment =</strong><br>
+                            &nbsp;&nbsp;Initial Cash (Misc Fees & Inventory)<br>
+                            &nbsp;&nbsp;+ Scan Tool Cost<br>
+                            &nbsp;&nbsp;+ (Vehicle Lifts Qty × Unit Cost)<br>
+                            &nbsp;&nbsp;+ Tire Balance Machine<br>
+                            &nbsp;&nbsp;+ Air Compressor<br>
+                            &nbsp;&nbsp;+ Workbenches & Shelving<br>
+                            &nbsp;&nbsp;+ Oil & Coolant Systems<br>
+                            &nbsp;&nbsp;+ (Initial Laptops × Unit Cost)<br>
+                            &nbsp;&nbsp;+ (Initial Desktops × Unit Cost)<br>
+                            &nbsp;&nbsp;+ Mobile Detail Van<br>
+                            &nbsp;&nbsp;+ Detail Equipment<br>
+                            &nbsp;&nbsp;+ Marketing & Signage<br>
+                            &nbsp;&nbsp;+ Licenses & Permits<br>
+                            &nbsp;&nbsp;+ Insurance Deposit
+                        </div>
+                        <div class="formula-example" id="initialInvestmentExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-card">
+                    <h3>Starting Cash Position</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            Starting Cash Position = -Total Initial Investment
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Note:</strong> Business starts in debt from all startup costs including initial cash for misc fees and inventory
+                        </div>
+                        <div class="formula-example" id="startingCashExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Department Section -->
+            <div class="formula-section">
+                <h2>Service Department</h2>
+                <div class="formula-card">
+                    <h3>Service Revenue</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Service Revenue =</strong><br>
+                            &nbsp;&nbsp;Labor Rate × Operating Hours per Day × Working Days × (Total Efficiency ÷ 100)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Note:</strong> Total Efficiency starts at Starting Bays × Starting Efficiency
+                        </div>
+                        <div class="formula-example" id="serviceRevenueExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Efficiency Growth (After Month 1)</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            New Total Efficiency = Previous Total Efficiency × (1 + Growth Rate ÷ 100)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Cap:</strong> Limited to Max Bays × 100%
+                        </div>
+                        <div class="formula-example" id="efficiencyGrowthExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Bay Addition Trigger</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            New Bay Added When: Total Efficiency ≥ Current Bays × 100%
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Result:</strong> Adds 1 bay and 1 technician
+                        </div>
+                        <div class="formula-example" id="bayTriggerExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Work Orders</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            Work Orders = Service Revenue ÷ (Labor Rate × Hours per Ticket)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Note:</strong> Rounded down to whole number
+                        </div>
+                        <div class="formula-example" id="workOrdersExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parts Department Section -->
+            <div class="formula-section">
+                <h2>Parts Department</h2>
+                <div class="formula-card">
+                    <h3>Parts Revenue</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            Parts Revenue = Service Revenue × (Parts Revenue Percent ÷ 100)
+                        </div>
+                        <div class="formula-example" id="partsRevenueExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Department Section -->
+            <div class="formula-section">
+                <h2>Detail Department</h2>
+                <div class="formula-card">
+                    <h3>Detail Revenue</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Detail Revenue =</strong><br>
+                            &nbsp;&nbsp;Detail Hourly Rate × Operating Hours per Day × Working Days × (Total Detail Efficiency ÷ 100)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Note:</strong> Total Detail Efficiency starts at Starting Detail Workers × Starting Detail Efficiency
+                        </div>
+                        <div class="formula-example" id="detailRevenueExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Detail Efficiency Growth</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            New Total Detail Efficiency = Previous Total × (1 + Detail Growth Rate ÷ 100)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Cap:</strong> Limited to Max Detail Workers × 100%
+                        </div>
+                        <div class="formula-example" id="detailEfficiencyGrowthExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Detail Worker Addition</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            New Worker Added When: Total Detail Efficiency ≥ Current Workers × 100%
+                        </div>
+                        <div class="formula-example" id="detailWorkerTriggerExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Revenue Section -->
+            <div class="formula-section">
+                <h2>Other Revenue Streams</h2>
+                <div class="formula-card">
+                    <h3>Shop Charge</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Shop Charge =</strong><br>
+                            &nbsp;&nbsp;MIN(Work Orders × Shop Charge Cap,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Service Revenue × Shop Charge Percent ÷ 100)
+                        </div>
+                        <div class="formula-example" id="shopChargeExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Warranty Revenue</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Warranty Count =</strong><br>
+                            &nbsp;&nbsp;FLOOR(Work Orders × Warranty Percent ÷ 100)<br><br>
+                            <strong>Warranty Revenue =</strong><br>
+                            &nbsp;&nbsp;Warranty Count × Warranty Price
+                        </div>
+                        <div class="formula-example" id="warrantyRevenueExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Used Car Sales</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Month 1:</strong><br>
+                            &nbsp;&nbsp;Initial Used Cars × Profit per Car<br><br>
+                            <strong>Subsequent Months:</strong><br>
+                            &nbsp;&nbsp;Previous Month × (1 + Growth Percent ÷ 100)
+                        </div>
+                        <div class="formula-example" id="usedCarSalesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Disposal Fees</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Oil Disposal =</strong><br>
+                            &nbsp;&nbsp;Oil Disposal Fee × (Total Efficiency ÷ 100)<br><br>
+                            <strong>General Disposal =</strong><br>
+                            &nbsp;&nbsp;General Disposal Fee × (Total Efficiency ÷ 100)<br><br>
+                            <strong>Battery Disposal =</strong><br>
+                            &nbsp;&nbsp;Battery Disposal Fee × (Total Efficiency ÷ 100)
+                        </div>
+                        <div class="formula-example" id="disposalFeesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Labor Costs Section -->
+            <div class="formula-section">
+                <h2>Labor Costs</h2>
+                <div class="formula-card">
+                    <h3>Technician Salaries</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Tech Salaries =</strong><br>
+                            &nbsp;&nbsp;(Senior Tech Annual ÷ 12)<br>
+                            &nbsp;&nbsp;+ ((Tech Count - 1) × Junior Tech Annual ÷ 12)<br>
+                            &nbsp;&nbsp;+ (Tech Count × Annual Bonus ÷ 12)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Note:</strong> Always 1 senior tech, rest are junior techs
+                        </div>
+                        <div class="formula-example" id="techSalariesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Detail Worker Salaries</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Detail Annual Salary =</strong><br>
+                            &nbsp;&nbsp;Detail Hourly Rate × 8 hours × 21 days × 12 months<br><br>
+                            <strong>Detail Salaries =</strong><br>
+                            &nbsp;&nbsp;Current Detail Workers × (Detail Annual ÷ 12)
+                        </div>
+                        <div class="formula-example" id="detailSalariesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Other Salaries</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Service Advisor =</strong><br>
+                            &nbsp;&nbsp;Service Advisor Annual ÷ 12<br><br>
+                            <strong>Manager =</strong><br>
+                            &nbsp;&nbsp;Manager Annual ÷ 12
+                        </div>
+                        <div class="formula-example" id="otherSalariesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Detail Commission</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Detail Commission =</strong><br>
+                            &nbsp;&nbsp;Detail Revenue × (Detail Commission Percent ÷ 100)
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Note:</strong> Commission paid to detail workers based on revenue they generate
+                        </div>
+                        <div class="formula-example" id="detailCommissionExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operating Expenses Section -->
+            <div class="formula-section">
+                <h2>Operating Expenses</h2>
+                <div class="formula-card">
+                    <h3>Variable Costs (Scale with Efficiency)</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Oil Costs =</strong><br>
+                            &nbsp;&nbsp;Monthly Oil Cost per Lift × (Total Efficiency ÷ 100)<br><br>
+                            <strong>Shop Supplies =</strong><br>
+                            &nbsp;&nbsp;Monthly Supplies per Lift × (Total Efficiency ÷ 100)
+                        </div>
+                        <div class="formula-example" id="variableCostsExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Revenue-Based Expenses</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Advertising =</strong><br>
+                            &nbsp;&nbsp;Total Revenue × (Advertising Percent ÷ 100)<br><br>
+                            <strong>Payment Processing =</strong><br>
+                            &nbsp;&nbsp;(Total Revenue × Processing Percent ÷ 100)<br>
+                            &nbsp;&nbsp;+ (Work Orders × Per Transaction Fee)
+                        </div>
+                        <div class="formula-example" id="revenueBasedExpensesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Fixed Monthly Expenses</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Fixed Monthly Expenses:</strong><br>
+                            &nbsp;&nbsp;• ShopKey Software (monthly)<br>
+                            &nbsp;&nbsp;• Fuel Card (monthly)<br>
+                            &nbsp;&nbsp;• Utilities (monthly)<br>
+                            &nbsp;&nbsp;• Detail Supplies (monthly)<br>
+                            &nbsp;&nbsp;• Surety Bond (monthly)<br>
+                            &nbsp;&nbsp;• General Liability (monthly)<br>
+                            &nbsp;&nbsp;• AAA Membership (annual ÷ 12)
+                        </div>
+                        <div class="formula-example" id="fixedExpensesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Periodic Expenses</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Periodic Expenses (every 6 months):</strong><br>
+                            &nbsp;&nbsp;• Waste Oil Filters<br>
+                            &nbsp;&nbsp;• Coolant Disposal
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Frequency:</strong> Occurs when month % 6 = 0
+                        </div>
+                        <div class="formula-example" id="periodicExpensesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Calculations Section -->
+            <div class="formula-section">
+                <h2>Financial Summary</h2>
+                <div class="formula-card">
+                    <h3>Total Revenue</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Total Revenue =</strong><br>
+                            &nbsp;&nbsp;Service Revenue<br>
+                            &nbsp;&nbsp;+ Parts Revenue<br>
+                            &nbsp;&nbsp;+ Detail Revenue<br>
+                            &nbsp;&nbsp;+ Used Car Sales<br>
+                            &nbsp;&nbsp;+ Shop Charge<br>
+                            &nbsp;&nbsp;+ Warranty Revenue<br>
+                            &nbsp;&nbsp;+ Oil Disposal<br>
+                            &nbsp;&nbsp;+ General Disposal<br>
+                            &nbsp;&nbsp;+ Battery Disposal
+                        </div>
+                        <div class="formula-example" id="totalRevenueExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Total Expenses</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Total Expenses =</strong><br>
+                            &nbsp;&nbsp;Tech Salaries<br>
+                            &nbsp;&nbsp;+ Detail Salaries<br>
+                            &nbsp;&nbsp;+ Advisor Salary<br>
+                            &nbsp;&nbsp;+ Manager Salary<br>
+                            &nbsp;&nbsp;+ Detail Commission<br>
+                            &nbsp;&nbsp;+ Oil Costs<br>
+                            &nbsp;&nbsp;+ Advertising<br>
+                            &nbsp;&nbsp;+ ShopKey<br>
+                            &nbsp;&nbsp;+ AAA<br>
+                            &nbsp;&nbsp;+ Fuel Card<br>
+                            &nbsp;&nbsp;+ Utilities<br>
+                            &nbsp;&nbsp;+ Periodic Expenses<br>
+                            &nbsp;&nbsp;+ Shop Supplies<br>
+                            &nbsp;&nbsp;+ Detail Supplies<br>
+                            &nbsp;&nbsp;+ Surety Bond<br>
+                            &nbsp;&nbsp;+ Liability<br>
+                            &nbsp;&nbsp;+ Payment Processing
+                        </div>
+                        <div class="formula-example" id="totalExpensesExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <h3>Net Income & Cash Position</h3>
+                    <div class="formula-display">
+                        <div class="formula-text">
+                            <strong>Net Income =</strong><br>
+                            &nbsp;&nbsp;Total Revenue - Total Expenses<br><br>
+                            <strong>Cash Position =</strong><br>
+                            &nbsp;&nbsp;Previous Cash Position + Net Income
+                        </div>
+                        <div class="formula-notes">
+                            <strong>Month 1:</strong> Cash Position = Starting Cash + Net Income
+                        </div>
+                        <div class="formula-example" id="netIncomeExample">
+                            <!-- Live calculation will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-links" style="margin-top: 2rem;">
+            <a href="index.html" class="btn btn-primary">← Back to Projections</a>
+        </div>
+    </div>
+
+    <script src="js/bundle.js"></script>
+    <script src="js/formulas.js"></script>
+</body>
+</html>
