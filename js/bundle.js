@@ -1094,7 +1094,7 @@
         } else {
             displayData.forEach(m => {
                 const monthExpenses = m.oilCosts + m.partsCost + m.techSalaries + m.detailSalaries + m.advisorSalary + 
-                                    m.managerSalary + m.totalPayrollTaxes + m.advertising + m.utilities + m.shopKey + 
+                                    m.managerSalary + m.totalPayrollTaxes + m.advertising + m.rent + m.utilities + m.shopKey + 
                                     m.paymentProcessing + m.detailCommission + m.fuelCard + m.detailSupplies + m.shopSupplies + 
                                     m.suretyBond + m.liability + m.aaaSignup + m.wasteOilFilters + m.coolantDisposal;
                 row += `<td>${formatCurrency(monthExpenses)}</td>`;
@@ -1126,7 +1126,7 @@
                 const monthRevenue = m.serviceRevenue + m.partsRevenue + m.detailRevenue + m.usedCarSales + 
                                    m.shopCharge + m.warrantyRevenue + m.oilDisposal + m.disposalFees + m.batteryDisposal;
                 const monthExpenses = m.oilCosts + m.partsCost + m.techSalaries + m.detailSalaries + m.advisorSalary + 
-                                    m.managerSalary + m.totalPayrollTaxes + m.advertising + m.utilities + m.shopKey + 
+                                    m.managerSalary + m.totalPayrollTaxes + m.advertising + m.rent + m.utilities + m.shopKey + 
                                     m.paymentProcessing + m.detailCommission + m.fuelCard + m.detailSupplies + m.shopSupplies + 
                                     m.suretyBond + m.liability + m.aaaSignup + m.wasteOilFilters + m.coolantDisposal;
                 const netIncome = monthRevenue - monthExpenses;
