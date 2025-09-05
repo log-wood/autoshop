@@ -560,7 +560,7 @@
         csv += 'Warranty Revenue,Oil Disposal,Disposal Fees,Battery Disposal,Used Car Sales,';
         csv += 'Detail Revenue,Total Revenue,Tech Salaries,Detail Salaries,Advisor Salary,';
         csv += 'Manager Salary,Parts Cost,Workers Comp,Social Security,Medicare,FUTA,Total Payroll Taxes,';
-        csv += 'Advertising,Shop Key,AAA Signup,Fuel Card,Utilities,';
+        csv += 'Advertising,Shop Key,AAA Signup,Fuel Card,Utilities,Rent,';
         csv += 'Waste Oil Filters,Waste Coolant Disposal,Oil Costs,';
         csv += 'Detail Supplies,Shop Supplies,Surety Bond,Liability,Payment Processing,';
         csv += 'Detail Commission,Total Expenses,Net Income\n';
@@ -595,7 +595,7 @@
             csv += `${m.medicare.toFixed(0)},${m.futa.toFixed(0)},${m.totalPayrollTaxes.toFixed(0)},`;
             csv += `${m.advertising.toFixed(0)},`;
             csv += `${m.shopKey.toFixed(0)},${m.aaaSignup.toFixed(0)},`;
-            csv += `${m.fuelCard.toFixed(0)},${m.utilities.toFixed(0)},`;
+            csv += `${m.fuelCard.toFixed(0)},${m.utilities.toFixed(0)},${m.rent.toFixed(0)},`;
             csv += `${m.wasteOilFilters.toFixed(0)},`;
             csv += `${m.coolantDisposal.toFixed(0)},`;
             csv += `${m.oilCosts.toFixed(0)},${m.detailSupplies.toFixed(0)},`;
@@ -992,7 +992,7 @@
         if (year === 'summary') {
             displayData.forEach(yearData => {
                 const yearTotal = yearData.oilCosts + yearData.partsCost + yearData.techSalaries + yearData.detailSalaries + yearData.advisorSalary + 
-                                yearData.managerSalary + yearData.totalPayrollTaxes + yearData.advertising + yearData.utilities + yearData.shopKey + 
+                                yearData.managerSalary + yearData.totalPayrollTaxes + yearData.advertising + yearData.rent + yearData.utilities + yearData.shopKey + 
                                 yearData.paymentProcessing + yearData.detailCommission + yearData.fuelCard + yearData.detailSupplies + yearData.shopSupplies + 
                                 yearData.suretyBond + yearData.liability + yearData.aaaSignup + yearData.wasteOilFilters + yearData.coolantDisposal;
                 row += `<td>${formatCurrency(yearTotal)}</td>`;
@@ -1020,7 +1020,7 @@
                 const yearRevenue = yearData.serviceRevenue + yearData.partsRevenue + yearData.detailRevenue + yearData.usedCarSales + 
                                   yearData.shopCharge + yearData.warrantyRevenue + yearData.oilDisposal + yearData.disposalFees + yearData.batteryDisposal;
                 const yearExpenses = yearData.oilCosts + yearData.partsCost + yearData.techSalaries + yearData.detailSalaries + yearData.advisorSalary + 
-                                   yearData.managerSalary + yearData.totalPayrollTaxes + yearData.advertising + yearData.utilities + yearData.shopKey + 
+                                   yearData.managerSalary + yearData.totalPayrollTaxes + yearData.advertising + yearData.rent + yearData.utilities + yearData.shopKey + 
                                    yearData.paymentProcessing + yearData.detailCommission + yearData.fuelCard + yearData.detailSupplies + yearData.shopSupplies + 
                                    yearData.suretyBond + yearData.liability + yearData.aaaSignup + yearData.wasteOilFilters + yearData.coolantDisposal;
                 const netIncome = yearRevenue - yearExpenses;
