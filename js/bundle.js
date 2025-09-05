@@ -851,9 +851,9 @@
         let infoHTML = '';
         
         if (bayChanges.length > 0) {
-            infoHTML += `<strong>Service Bay Events:</strong> ${bayChanges.join(' | ')}`;
+            infoHTML += `<strong>Service Dept Events:</strong> ${bayChanges.join(' | ')}`;
             if (finalMonth.bays >= config.maxBays) {
-                infoHTML += ` | <strong>Max bays reached</strong>`;
+                infoHTML += ` | <strong>Max Techs Reached</strong>`;
             }
         } else {
             infoHTML += `<strong>Service:</strong> No bay additions. Final: ${finalTotalEfficiency.toFixed(0)}% with ${finalMonth.bays} bay(s)`;
@@ -864,7 +864,7 @@
         if (detailChanges.length > 0) {
             infoHTML += `<strong>Detail Dept Events:</strong> ${detailChanges.join(' | ')}`;
             if (finalMonth.detailWorkers >= config.maxDetailWorkers) {
-                infoHTML += ` | <strong>Max workers reached</strong>`;
+                infoHTML += ` | <strong>Max Workers Reached</strong>`;
             }
         } else {
             infoHTML += `<strong>Detail:</strong> No worker additions. Final: ${finalDetailEfficiency.toFixed(0)}% with ${finalMonth.detailWorkers} worker(s)`;
@@ -1407,7 +1407,16 @@
         function createStickyHeader() {
             if (stickyHeader) return stickyHeader;
             
+            // Deep clone the thead with all its content
             const headerClone = thead.cloneNode(true);
+            
+            // Remove the sticky positioning from cloned headers to prevent conflicts
+            const clonedThs = headerClone.querySelectorAll('th');
+            clonedThs.forEach(th => {
+                th.style.position = 'relative';
+                th.style.top = 'auto';
+            });
+            
             stickyHeader = document.createElement('div');
             stickyHeader.className = 'sticky-header-container';
             
@@ -1425,27 +1434,47 @@
                 overflow: hidden;
             `;
             
+            const innerWrapper = document.createElement('div');
+            innerWrapper.style.cssText = `
+                overflow: hidden;
+                width: 100%;
+            `;
+            
             const innerTable = document.createElement('table');
             innerTable.style.cssText = `
                 width: ${table.offsetWidth}px;
                 border-collapse: collapse;
-                table-layout: fixed;
+                font-size: 0.95em;
             `;
             
-            // Copy column widths from original table
+            // Copy computed styles and column widths from original table
             const originalThs = thead.querySelectorAll('th');
-            const clonedThs = headerClone.querySelectorAll('th');
-            originalThs.forEach((th, index) => {
-                if (clonedThs[index]) {
-                    clonedThs[index].style.width = `${th.offsetWidth}px`;
-                    clonedThs[index].style.minWidth = `${th.offsetWidth}px`;
-                    clonedThs[index].style.maxWidth = `${th.offsetWidth}px`;
+            clonedThs.forEach((th, index) => {
+                if (originalThs[index]) {
+                    const originalWidth = originalThs[index].getBoundingClientRect().width;
+                    th.style.width = `${originalWidth}px`;
+                    th.style.minWidth = `${originalWidth}px`;
+                    th.style.maxWidth = `${originalWidth}px`;
+                    th.style.padding = window.getComputedStyle(originalThs[index]).padding;
+                    th.style.textAlign = window.getComputedStyle(originalThs[index]).textAlign;
+                    th.style.background = '#f8f9fa';
+                    th.style.borderBottom = '2px solid #dee2e6';
+                    th.style.fontWeight = '600';
+                    th.style.color = '#495057';
+                    
+                    // Special styling for first column
+                    if (index === 0) {
+                        th.style.position = 'sticky';
+                        th.style.left = '0';
+                        th.style.zIndex = '3000';
+                        th.style.textAlign = 'left';
+                    }
                 }
             });
             
             innerTable.appendChild(headerClone);
-            
-            stickyHeader.appendChild(innerTable);
+            innerWrapper.appendChild(innerTable);
+            stickyHeader.appendChild(innerWrapper);
             document.body.appendChild(stickyHeader);
             
             return stickyHeader;
