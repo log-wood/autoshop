@@ -808,7 +808,7 @@
                      'warrantyRevenue', 'oilDisposal', 'disposalFees', 'batteryDisposal',
                      'oilCosts', 'partsCost', 'techSalaries', 'detailSalaries', 'advisorSalary', 'managerSalary', 
                      'workersComp', 'socialSecurity', 'medicare', 'futa', 'totalPayrollTaxes',
-                     'advertising', 'utilities', 'shopKey', 'paymentProcessing', 'detailCommission', 'fuelCard', 'detailSupplies', 'shopSupplies',
+                     'advertising', 'rent', 'utilities', 'shopKey', 'paymentProcessing', 'detailCommission', 'fuelCard', 'detailSupplies', 'shopSupplies',
                      'suretyBond', 'liability', 'aaaSignup', 'wasteOilFilters', 'coolantDisposal'];
                      
         keys.forEach(key => {
