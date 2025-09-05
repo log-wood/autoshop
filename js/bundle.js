@@ -30,6 +30,7 @@
         maxBays: 6,
         startingEfficiency: 40,
         growthRate: 20,
+        startingMonth: 0,  // 0=January, 1=February, ..., 11=December
         
         // Service Configuration
         laborRate: 125,
@@ -99,7 +100,13 @@
         futaWageCap: 7000, // Annual cap per employee
         
         // Essential Calculation Formulas
-        paymentProcessFormula: 'percentPlusTransaction'
+        paymentProcessFormula: 'percentPlusTransaction',
+        
+        // Monthly Efficiency Multipliers (12 months, repeats each year)
+        monthlyEfficiencyMultipliers: [
+            100, 100, 100, 100, 100, 100,  // Months 1-6
+            100, 100, 100, 100, 100, 100   // Months 7-12
+        ]
     };
 
     let config = { ...defaultConfig };
@@ -122,11 +129,27 @@
         const inputs = document.querySelectorAll('.control-group input, .control-group select');
         const updates = {};
         
+        // Handle monthly multipliers separately
+        const multipliers = [];
+        for (let i = 0; i < 12; i++) {
+            const multiplierInput = document.getElementById(`monthMultiplier${i}`);
+            if (multiplierInput) {
+                multipliers.push(parseInt(multiplierInput.value) || 100);
+            }
+        }
+        if (multipliers.length === 12) {
+            updates.monthlyEfficiencyMultipliers = multipliers;
+        }
+        
         inputs.forEach(input => {
             const key = input.id;
+            // Skip monthly multiplier inputs as they're handled above
+            if (key.startsWith('monthMultiplier')) return;
+            
             if (config.hasOwnProperty(key)) {
                 if (input.tagName === 'SELECT') {
-                    updates[key] = input.value;
+                    // Convert select values to numbers if they're numeric
+                    updates[key] = isNaN(input.value) ? input.value : parseInt(input.value);
                 } else if (input.type === 'number') {
                     const value = input.step && input.step.includes('.') ? 
                         parseFloat(input.value) : 
@@ -143,9 +166,19 @@
 
     function updateInputsFromConfig() {
         Object.keys(config).forEach(key => {
-            const input = document.getElementById(key);
-            if (input) {
-                input.value = config[key];
+            // Handle monthly multipliers separately
+            if (key === 'monthlyEfficiencyMultipliers') {
+                config.monthlyEfficiencyMultipliers.forEach((value, index) => {
+                    const input = document.getElementById(`monthMultiplier${index}`);
+                    if (input) {
+                        input.value = value;
+                    }
+                });
+            } else {
+                const input = document.getElementById(key);
+                if (input) {
+                    input.value = config[key];
+                }
             }
         });
     }
@@ -171,6 +204,15 @@
         
         if (testConfig.workingDays < 1 || testConfig.workingDays > 31) {
             errors.push('Working days must be between 1 and 31');
+        }
+        
+        // Validate monthly efficiency multipliers
+        if (testConfig.monthlyEfficiencyMultipliers) {
+            testConfig.monthlyEfficiencyMultipliers.forEach((multiplier, index) => {
+                if (multiplier < 0 || multiplier > 200) {
+                    errors.push(`Month ${index + 1} multiplier must be between 0 and 200%`);
+                }
+            });
         }
         
         return errors;
@@ -447,10 +489,16 @@
                 }
             }
             
+            // Get the monthly efficiency multiplier based on calendar month
+            // The multipliers are indexed by calendar month (0=Jan, 1=Feb, etc.)
+            // We need to map the projection month to the actual calendar month
+            const calendarMonthIndex = (config.startingMonth + month) % 12;
+            const monthlyMultiplier = (config.monthlyEfficiencyMultipliers[calendarMonthIndex] || 100) / 100;
+            
             // Calculate service revenue based on total efficiency
             // Each 100% efficiency = 1 tech working full time = laborRate × 8 hours × working days
             const maxRevenuePerFullTech = config.laborRate * config.operatingHoursPerDay * config.workingDays;
-            let serviceRevenue = maxRevenuePerFullTech * (totalEfficiency / 100);
+            let serviceRevenue = maxRevenuePerFullTech * (totalEfficiency / 100) * monthlyMultiplier;
             
             // Calculate average efficiency per bay for display purposes
             let currentEfficiency = totalEfficiency / currentBays;
@@ -475,13 +523,20 @@
             // Used car sales
             const initialUsedCarRevenue = config.initialUsedCars * config.profitPerUsedCar;
             // Used car sales with fixed growth rate
-            const carSalesBase = month === 0 ? initialUsedCarRevenue : months[month - 1].usedCarSales;
-            const usedCarSales = carSalesBase * (1 + config.usedCarGrowthPercent / 100);
+            let usedCarSalesBase;
+            if (month === 0) {
+                usedCarSalesBase = initialUsedCarRevenue;
+            } else {
+                // Get the base value from previous month (before multiplier was applied)
+                usedCarSalesBase = months[month - 1].usedCarSalesBase || months[month - 1].usedCarSales;
+            }
+            const usedCarSalesGrowth = usedCarSalesBase * (1 + config.usedCarGrowthPercent / 100);
+            const usedCarSales = usedCarSalesGrowth * monthlyMultiplier;
             
             // Calculate detail revenue based on detail worker efficiency
             // Each detail worker at 100% = charge rate × 8 hours × working days
             const maxDetailRevenuePerWorker = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
-            const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100);
+            const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100) * monthlyMultiplier;
             
             // Calculate average detail efficiency for display
             let currentDetailEfficiency = totalDetailEfficiency / currentDetailWorkers;
@@ -511,19 +566,19 @@
             const payrollTaxes = calculatePayrollTaxes(month, totalPayroll, techCount, currentDetailWorkers, 
                                                      advisorSalary, managerSalary, config, techHireDates, detailHireDates);
             
-            // Calculate oil costs - scales with total efficiency
+            // Calculate oil costs - scales with total efficiency and monthly multiplier
             // This is the cost of oil we purchase to put in customer vehicles
-            let oilCosts = config.monthlyOilCostPerLift * (totalEfficiency / 100);
+            let oilCosts = config.monthlyOilCostPerLift * (totalEfficiency / 100) * monthlyMultiplier;
             
-            // Calculate shop supplies - scales with total efficiency ($250 per lift)
-            let shopSupplies = config.monthlyShopSuppliesPerLift * (totalEfficiency / 100);
+            // Calculate shop supplies - scales with total efficiency and monthly multiplier ($250 per lift)
+            let shopSupplies = config.monthlyShopSuppliesPerLift * (totalEfficiency / 100) * monthlyMultiplier;
             
-            // Calculate disposal fee revenue - scale with total efficiency
+            // Calculate disposal fee revenue - scale with total efficiency and monthly multiplier
             // These are fees we charge customers for disposing of waste materials
             // We also sell the waste oil, generating additional revenue
-            let oilDisposal = config.oilDisposalFee * (totalEfficiency / 100);
-            let generalDisposal = config.generalDisposalFee * (totalEfficiency / 100);
-            let batteryDisposal = config.batteryDisposalFee * (totalEfficiency / 100);
+            let oilDisposal = config.oilDisposalFee * (totalEfficiency / 100) * monthlyMultiplier;
+            let generalDisposal = config.generalDisposalFee * (totalEfficiency / 100) * monthlyMultiplier;
+            let batteryDisposal = config.batteryDisposalFee * (totalEfficiency / 100) * monthlyMultiplier;
 
             // Calculate total revenue
             const totalRevenue = serviceRevenue + partsRevenue + shopCharge + warrantyRevenue + 
@@ -577,6 +632,7 @@
                 disposalFees: generalDisposal,
                 batteryDisposal: batteryDisposal,
                 usedCarSales: usedCarSales,
+                usedCarSalesBase: usedCarSalesGrowth,  // Store base value before multiplier for next month's growth calc
                 detailRevenue: detailRevenue,
                 // Expenses
                 techSalaries: techSalaries,
@@ -918,6 +974,9 @@
         
         let startMonth, endMonth, displayData;
         
+        // Month name arrays
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
         if (year === 'summary') {
             // Show yearly totals for 3-year summary
             displayData = [
@@ -934,8 +993,10 @@
             displayData = data.slice(startMonth, endMonth);
             
             let headerRow = '<tr><th>Category</th>';
+            const startingMonth = config.startingMonth || 0;
             for (let i = 0; i < 12; i++) {
-                headerRow += `<th>Month ${i + 1}</th>`;
+                const monthIndex = (startingMonth + startMonth + i) % 12;
+                headerRow += `<th>${monthNames[monthIndex]}</th>`;
             }
             headerRow += '<th>Year Total</th></tr>';
             tableHead.innerHTML = headerRow;
@@ -1200,6 +1261,12 @@
         }
         
         monthlyData = calculateMonthlyData();
+        
+        // Reset to Year 1 tab
+        const tabs = document.querySelectorAll('.tab-button');
+        tabs.forEach(t => t.classList.remove('active'));
+        const year1Tab = document.querySelector('.tab-button[data-year="1"]');
+        if (year1Tab) year1Tab.classList.add('active');
         
         // Default to showing Year 1
         updateMetrics(monthlyData, 1);

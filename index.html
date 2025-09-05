@@ -130,6 +130,92 @@
                 </div>
             </div>
 
+            <!-- Monthly Efficiency Multipliers -->
+            <div class="config-section collapsed" id="monthlyMultipliersConfig">
+                <div class="config-section-header">
+                    <span>Monthly Efficiency Multipliers</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="config-section-content">
+                    <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">
+                        Adjust efficiency for each calendar month. These multipliers apply to the corresponding calendar months regardless of starting month.
+                    </p>
+                    <div class="control-row">
+                        <div class="control-group" style="grid-column: span 2;">
+                            <label for="startingMonth">Business Starting Month</label>
+                            <select id="startingMonth" style="width: 100%;">
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
+                                <option value="7">August</option>
+                                <option value="8">September</option>
+                                <option value="9">October</option>
+                                <option value="10">November</option>
+                                <option value="11">December</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="monthMultiplier0">January (%)</label>
+                            <input type="number" id="monthMultiplier0" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier1">February (%)</label>
+                            <input type="number" id="monthMultiplier1" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier2">March (%)</label>
+                            <input type="number" id="monthMultiplier2" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier3">April (%)</label>
+                            <input type="number" id="monthMultiplier3" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="monthMultiplier4">May (%)</label>
+                            <input type="number" id="monthMultiplier4" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier5">June (%)</label>
+                            <input type="number" id="monthMultiplier5" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier6">July (%)</label>
+                            <input type="number" id="monthMultiplier6" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier7">August (%)</label>
+                            <input type="number" id="monthMultiplier7" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label for="monthMultiplier8">September (%)</label>
+                            <input type="number" id="monthMultiplier8" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier9">October (%)</label>
+                            <input type="number" id="monthMultiplier9" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier10">November (%)</label>
+                            <input type="number" id="monthMultiplier10" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="monthMultiplier11">December (%)</label>
+                            <input type="number" id="monthMultiplier11" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Service Configuration -->
             <div class="config-section collapsed" id="serviceConfig">
                 <div class="config-section-header">
