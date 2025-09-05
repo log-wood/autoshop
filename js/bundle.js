@@ -1302,11 +1302,19 @@
                 // Get year from data attribute
                 const year = e.target.getAttribute('data-year');
                 
+                // Clean up sticky header before regenerating table
+                cleanupStickyHeader();
+                
                 // Regenerate table and metrics for selected year
                 if (monthlyData.length > 0) {
                     const yearValue = year === 'summary' ? 'summary' : parseInt(year);
                     generateTable(monthlyData, yearValue);
                     updateMetrics(monthlyData, yearValue);
+                    
+                    // Re-setup sticky header after table is regenerated
+                    setTimeout(() => {
+                        setupStickyHeader();
+                    }, 100);
                 }
             });
         });
@@ -1394,7 +1402,43 @@
         }, 100);
     }
     
+    // Store event listeners globally to clean them up
+    let stickyHeaderListeners = {
+        scroll: null,
+        resize: null,
+        tableScroll: null,
+        tabClickHandlers: []
+    };
+    
+    function cleanupStickyHeader() {
+        // Remove existing event listeners
+        if (stickyHeaderListeners.scroll) {
+            window.removeEventListener('scroll', stickyHeaderListeners.scroll);
+            stickyHeaderListeners.scroll = null;
+        }
+        if (stickyHeaderListeners.resize) {
+            window.removeEventListener('resize', stickyHeaderListeners.resize);
+            stickyHeaderListeners.resize = null;
+        }
+        if (stickyHeaderListeners.tableScroll) {
+            const tableWrapper = document.querySelector('.table-wrapper');
+            if (tableWrapper) {
+                tableWrapper.removeEventListener('scroll', stickyHeaderListeners.tableScroll);
+            }
+            stickyHeaderListeners.tableScroll = null;
+        }
+        
+        // Remove existing sticky header element
+        const existingStickyHeader = document.querySelector('.sticky-header-container');
+        if (existingStickyHeader) {
+            existingStickyHeader.remove();
+        }
+    }
+    
     function setupStickyHeader() {
+        // Clean up any existing sticky header and listeners first
+        cleanupStickyHeader();
+        
         const tableWrapper = document.querySelector('.table-wrapper');
         const table = document.querySelector('table');
         const thead = document.querySelector('thead');
@@ -1449,18 +1493,33 @@
             
             // Copy computed styles and column widths from original table
             const originalThs = thead.querySelectorAll('th');
+            const originalTr = thead.querySelector('tr');
+            
+            // Set the height of the cloned header row to match original
+            const clonedTr = headerClone.querySelector('tr');
+            if (clonedTr && originalTr) {
+                const originalHeight = originalTr.getBoundingClientRect().height;
+                clonedTr.style.height = `${originalHeight}px`;
+            }
+            
             clonedThs.forEach((th, index) => {
                 if (originalThs[index]) {
-                    const originalWidth = originalThs[index].getBoundingClientRect().width;
-                    th.style.width = `${originalWidth}px`;
-                    th.style.minWidth = `${originalWidth}px`;
-                    th.style.maxWidth = `${originalWidth}px`;
-                    th.style.padding = window.getComputedStyle(originalThs[index]).padding;
-                    th.style.textAlign = window.getComputedStyle(originalThs[index]).textAlign;
+                    const originalRect = originalThs[index].getBoundingClientRect();
+                    const originalStyles = window.getComputedStyle(originalThs[index]);
+                    
+                    th.style.width = `${originalRect.width}px`;
+                    th.style.minWidth = `${originalRect.width}px`;
+                    th.style.maxWidth = `${originalRect.width}px`;
+                    th.style.height = `${originalRect.height}px`;
+                    th.style.padding = originalStyles.padding;
+                    th.style.textAlign = originalStyles.textAlign;
+                    th.style.fontSize = originalStyles.fontSize;
+                    th.style.lineHeight = originalStyles.lineHeight;
                     th.style.background = '#f8f9fa';
                     th.style.borderBottom = '2px solid #dee2e6';
                     th.style.fontWeight = '600';
                     th.style.color = '#495057';
+                    th.style.boxSizing = 'border-box';
                     
                     // Special styling for first column
                     if (index === 0) {
@@ -1520,28 +1579,20 @@
             }
         }
         
-        // Event listeners
-        window.addEventListener('scroll', updateStickyHeader);
-        window.addEventListener('resize', updateStickyHeader);
-        tableWrapper.addEventListener('scroll', () => {
+        // Store event listener functions for cleanup
+        stickyHeaderListeners.scroll = updateStickyHeader;
+        stickyHeaderListeners.resize = updateStickyHeader;
+        stickyHeaderListeners.tableScroll = () => {
             if (stickyHeader && stickyHeader.style.display === 'block') {
                 const innerTable = stickyHeader.querySelector('table');
                 innerTable.style.transform = `translateX(-${tableWrapper.scrollLeft}px)`;
             }
-        });
+        };
         
-        // Re-setup when table changes
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (stickyHeader) {
-                    stickyHeader.remove();
-                    stickyHeader = null;
-                }
-                setTimeout(() => {
-                    setupStickyHeader();
-                }, 100);
-            });
-        });
+        // Add event listeners
+        window.addEventListener('scroll', stickyHeaderListeners.scroll);
+        window.addEventListener('resize', stickyHeaderListeners.resize);
+        tableWrapper.addEventListener('scroll', stickyHeaderListeners.tableScroll);
     }
 
     // Start the application when DOM is ready
