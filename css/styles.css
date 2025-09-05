@@ -135,7 +135,6 @@ body {
     max-width: 1600px;
     margin: 0 auto;
     background: white;
-    border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     overflow: hidden;
 }
@@ -426,15 +425,23 @@ body {
 
 /* Table Styles */
 .table-wrapper {
-    padding: 30px;
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    position: relative;
 }
 
 table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
     font-size: 0.95em;
+    margin: 0;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 th {
@@ -452,6 +459,10 @@ th {
 th:first-child {
     text-align: left;
     padding-left: 15px;
+    position: sticky;
+    left: 0;
+    z-index: 11;
+    background: #f8f9fa;
 }
 
 td {
@@ -465,6 +476,10 @@ td:first-child {
     padding-left: 15px;
     font-weight: 500;
     color: #495057;
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 5;
 }
 
 tr.category-header td {
@@ -476,9 +491,14 @@ tr.category-header td {
     border-bottom: 2px solid #b8d4e8;
 }
 
+tr.category-header td:first-child {
+    background: #e8f4f8;
+}
+
 tr.subcategory td:first-child {
     padding-left: 35px;
     color: #6c757d;
+    background: white;
 }
 
 tr.total-row td {
@@ -489,6 +509,10 @@ tr.total-row td {
     border-bottom: 2px solid #28a745;
 }
 
+tr.total-row td:first-child {
+    background: #d4edda;
+}
+
 tr.payroll-total-row td {
     background: #fff3cd;
     font-weight: 700;
@@ -497,12 +521,20 @@ tr.payroll-total-row td {
     border-bottom: 2px solid #ffc107;
 }
 
+tr.payroll-total-row td:first-child {
+    background: #fff3cd;
+}
+
 tr.expense-total td {
     background: #f8d7da;
     font-weight: 700;
     color: #721c24;
     border-top: 2px solid #dc3545;
     border-bottom: 2px solid #dc3545;
+}
+
+tr.expense-total td:first-child {
+    background: #f8d7da;
 }
 
 tr.net-income td {
@@ -514,6 +546,10 @@ tr.net-income td {
     border: none;
 }
 
+tr.net-income td:first-child {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
 tr.cash-position td {
     background: linear-gradient(135deg, #2d5016 0%, #3a6b1f 100%);
     font-weight: 700;
@@ -521,6 +557,10 @@ tr.cash-position td {
     font-size: 1.1em;
     padding: 15px 10px;
     border: none;
+}
+
+tr.cash-position td:first-child {
+    background: linear-gradient(135deg, #2d5016 0%, #3a6b1f 100%);
 }
 
 /* Editable Fields */
@@ -621,21 +661,447 @@ tr.cash-position td {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    .table-wrapper {
-        padding: 15px;
+
+/* Small phones - up to 480px */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
     }
     
-    th, td {
-        padding: 8px 5px;
-        font-size: 0.85em;
+    
+    .header {
+        padding: 20px 15px;
     }
     
     .header h1 {
-        font-size: 1.8em;
+        font-size: 1.5em;
+        line-height: 1.3;
     }
+    
+    .header p {
+        font-size: 0.9em;
+    }
+    
+    /* Stack header buttons */
+    .header-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+    }
+    
+    .header-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .controls-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .controls-header h2 {
+        font-size: 1.1em;
+    }
+    
+    /* Configuration forms - single column on mobile */
+    .control-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .control-group {
+        width: 100%;
+    }
+    
+    .control-group input,
+    .control-group select {
+        width: 100%;
+        min-height: 44px; /* Touch-friendly size */
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .control-group label {
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+    
+    /* Config sections */
+    .config-section-header {
+        padding: 15px;
+        font-size: 0.95em;
+    }
+    
+    .config-section-content {
+        padding: 10px;
+    }
+    
+    /* Year tabs - horizontal scroll */
+    .year-tabs {
+        overflow-x: auto;
+        padding: 0 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .tab-button {
+        padding: 12px 15px;
+        font-size: 0.9em;
+        min-width: 80px;
+        white-space: nowrap;
+    }
+    
+    /* Metrics grid - single column */
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+    
+    .metric-card {
+        padding: 12px;
+    }
+    
+    .metric-card h4 {
+        font-size: 0.75em;
+    }
+    
+    .metric-card .value {
+        font-size: 1.2em;
+    }
+    
+    /* Bay info */
+    .bay-info {
+        margin: 10px 15px;
+        padding: 8px 12px;
+        font-size: 0.85em;
+    }
+    
+    /* Table wrapper with visual scroll indicator */
+    .table-wrapper {
+        position: relative;
+        max-width: 100vw;
+        max-height: calc(100vh - 150px);
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-wrapper::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+    }
+    
+    .table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .table-wrapper::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+    
+    /* Table adjustments */
+    table {
+        font-size: 0.75em;
+        min-width: 600px;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+    
+    th {
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        z-index: 10;
+    }
+    
+    th, td {
+        padding: 6px 4px;
+        font-size: 0.85em;
+    }
+    
+    th:first-child,
+    td:first-child {
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 5;
+        min-width: 100px;
+        padding-left: 8px;
+    }
+    
+    th:first-child {
+        background: #f8f9fa;
+        z-index: 21;
+    }
+    
+    tr.category-header td:first-child {
+        background: #e8f4f8;
+    }
+    
+    tr.total-row td:first-child {
+        background: #d4edda;
+    }
+    
+    tr.payroll-total-row td:first-child {
+        background: #fff3cd;
+    }
+    
+    tr.expense-total td:first-child {
+        background: #f8d7da;
+    }
+    
+    tr.net-income td:first-child {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+    
+    tr.cash-position td:first-child {
+        background: linear-gradient(135deg, #2d5016 0%, #3a6b1f 100%);
+    }
+    
+    .editable {
+        width: 60px;
+        min-height: 30px;
+        font-size: 0.85em;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 12px 20px;
+        font-size: 0.9em;
+        min-height: 44px;
+    }
+    
+    .button-row {
+        padding: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .button-row .btn {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 120px;
+    }
+    
+    /* Summary cards */
+    .summary-cards {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+    
+    .summary-card {
+        padding: 15px;
+    }
+    
+    .summary-card .value {
+        font-size: 1.5em;
+    }
+    
+    /* Formula page */
+    .formulas-content {
+        padding: 15px;
+    }
+    
+    .formula-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .formula-section h2 {
+        font-size: 1.3em;
+    }
+    
+    .formula-card {
+        padding: 15px;
+    }
+    
+    .formula-card h3 {
+        font-size: 1.1em;
+    }
+    
+    .formula-text {
+        font-size: 0.85em;
+        padding: 10px;
+    }
+}
 
+/* Tablets and medium devices - 481px to 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
+    .header {
+        padding: 25px 20px;
+    }
+    
+    .header h1 {
+        font-size: 2em;
+    }
+    
+    /* Configuration forms - 2 columns on tablets */
+    .control-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .control-group input,
+    .control-group select {
+        min-height: 40px;
+        font-size: 15px;
+    }
+    
+    /* Metrics grid - 2 columns */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 20px;
+    }
+    
+    /* Table wrapper */
+    .table-wrapper {
+        max-height: calc(100vh - 180px);
+        overflow: auto;
+    }
+    
+    table {
+        font-size: 0.85em;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+    
+    th {
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        z-index: 10;
+    }
+    
+    th, td {
+        padding: 8px 6px;
+    }
+    
+    th:first-child,
+    td:first-child {
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 5;
+        min-width: 120px;
+    }
+    
+    th:first-child {
+        background: #f8f9fa;
+        z-index: 21;
+    }
+    
     .editable {
         width: 70px;
+    }
+    
+    /* Summary cards - 2 columns */
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Buttons */
+    .button-row .btn {
+        min-width: 140px;
+    }
+}
+
+/* Small laptops and large tablets - 769px to 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 100%;
+    }
+    
+    /* Configuration forms - 3 columns */
+    .control-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    
+    /* Metrics grid - 3 columns */
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* Table adjustments for better readability */
+    table {
+        font-size: 0.9em;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+    }
+    
+    .editable {
+        width: 80px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Remove hover effects on touch devices */
+    .config-section-header:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .formula-card:hover {
+        transform: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .summary-card:hover {
+        transform: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Larger tap targets */
+    button, .btn, input, select, .tab-button {
+        min-height: 44px;
+    }
+    
+    /* Better touch feedback */
+    button:active, .btn:active, .tab-button:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .container {
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .controls-wrapper,
+    .button-row,
+    .year-tabs {
+        display: none;
+    }
+    
+    .table-wrapper {
+        overflow: visible;
+    }
+    
+    table {
+        font-size: 0.8em;
     }
 }

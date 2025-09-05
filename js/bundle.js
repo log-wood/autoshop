@@ -911,8 +911,10 @@
     }
 
     function generateTable(data, year = 1) {
-        const table = document.getElementById('plTable');
-        table.innerHTML = '';
+        const tableHead = document.getElementById('plTableHead');
+        const tableBody = document.getElementById('plTable');
+        tableHead.innerHTML = '';
+        tableBody.innerHTML = '';
         
         let startMonth, endMonth, displayData;
         
@@ -924,7 +926,7 @@
                 calculateYearlyTotals(data, 3)
             ];
             let headerRow = '<tr><th>Category</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>3-Year Total</th></tr>';
-            table.innerHTML = headerRow;
+            tableHead.innerHTML = headerRow;
         } else {
             // Show monthly data for specific year
             startMonth = (year - 1) * 12;
@@ -936,12 +938,12 @@
                 headerRow += `<th>Month ${i + 1}</th>`;
             }
             headerRow += '<th>Year Total</th></tr>';
-            table.innerHTML = headerRow;
+            tableHead.innerHTML = headerRow;
         }
         
         // INITIAL INVESTMENT SECTION (only for month view, not summary)
         if (year !== 'summary') {
-            table.innerHTML += '<tr class="category-header"><td colspan="14">INITIAL INVESTMENT</td></tr>';
+            tableBody.innerHTML += '<tr class="category-header"><td colspan="14">INITIAL INVESTMENT</td></tr>';
             
             // Initial Investment row
             let investmentRow = '<tr class="subcategory"><td>Initial Startup Investment</td>';
@@ -949,11 +951,11 @@
                 investmentRow += `<td>${m.initialInvestment > 0 ? formatCurrency(m.initialInvestment) : '-'}</td>`;
             });
             investmentRow += `<td>${formatCurrency(displayData[0].initialInvestment || 0)}</td></tr>`;
-            table.innerHTML += investmentRow;
+            tableBody.innerHTML += investmentRow;
         }
         
         // REVENUE SECTION
-        table.innerHTML += '<tr class="category-header"><td colspan="14">REVENUE</td></tr>';
+        tableBody.innerHTML += '<tr class="category-header"><td colspan="14">REVENUE</td></tr>';
         
         // Revenue items
         const revenueItems = [
@@ -968,7 +970,7 @@
             { key: 'batteryDisposal', label: 'Battery Disposal' }
         ];
         
-        table.innerHTML += generateTableSection(revenueItems, displayData, year, formatCurrency);
+        tableBody.innerHTML += generateTableSection(revenueItems, displayData, year, formatCurrency);
         
         // Total Revenue
         let row = '<tr class="total-row"><td>Total Revenue</td>';
@@ -991,13 +993,13 @@
             });
         }
         row += `<td>${formatCurrency(grandTotalRevenue)}</td></tr>`;
-        table.innerHTML += row;
+        tableBody.innerHTML += row;
         
         // EXPENSES SECTION
-        table.innerHTML += '<tr class="category-header"><td colspan="14">EXPENSES</td></tr>';
+        tableBody.innerHTML += '<tr class="category-header"><td colspan="14">EXPENSES</td></tr>';
         
         // Labor Costs
-        table.innerHTML += '<tr class="subcategory"><td><strong>Labor Costs</strong></td><td colspan="13"></td></tr>';
+        tableBody.innerHTML += '<tr class="subcategory"><td><strong>Labor Costs</strong></td><td colspan="13"></td></tr>';
         
         const laborItems = [
             { key: 'techSalaries', label: 'Technician Salaries + Bonuses' },
@@ -1006,7 +1008,7 @@
             { key: 'managerSalary', label: 'Manager' }
         ];
         
-        table.innerHTML += generateTableSection(laborItems, displayData, year, formatCurrency);
+        tableBody.innerHTML += generateTableSection(laborItems, displayData, year, formatCurrency);
         
         // Add Total Payroll row
         let totalPayrollRow = '<tr class="payroll-total-row"><td>Total Payroll</td>';
@@ -1024,20 +1026,20 @@
         totalPayrollRow += '<td>' + formatCurrency(displayData.reduce((sum, item) => {
             return sum + (item.totalPayroll || (item.techSalaries + item.detailSalaries + item.advisorSalary + item.managerSalary));
         }, 0)) + '</td></tr>';
-        table.innerHTML += totalPayrollRow;
+        tableBody.innerHTML += totalPayrollRow;
         
         // Cost of Goods Sold
-        table.innerHTML += '<tr class="subcategory"><td><strong>Cost of Goods Sold</strong></td><td colspan="13"></td></tr>';
+        tableBody.innerHTML += '<tr class="subcategory"><td><strong>Cost of Goods Sold</strong></td><td colspan="13"></td></tr>';
         
         const cogsItems = [
             { key: 'oilCosts', label: 'Oil Costs (Per Bay)' },
             { key: 'partsCost', label: 'Parts Cost (50% of Parts Revenue)' }
         ];
         
-        table.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency);
+        tableBody.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency);
         
         // Payroll Taxes
-        table.innerHTML += '<tr class="subcategory"><td><strong>Payroll Taxes</strong></td><td colspan="13"></td></tr>';
+        tableBody.innerHTML += '<tr class="subcategory"><td><strong>Payroll Taxes</strong></td><td colspan="13"></td></tr>';
         
         const payrollTaxItems = [
             { key: 'workersComp', label: 'Workers\' Compensation ($0.69 per $100)' },
@@ -1046,10 +1048,10 @@
             { key: 'futa', label: 'Federal Unemployment (0.6% first $7,000)' }
         ];
         
-        table.innerHTML += generateTableSection(payrollTaxItems, displayData, year, formatCurrency);
+        tableBody.innerHTML += generateTableSection(payrollTaxItems, displayData, year, formatCurrency);
         
         // Operating Expenses
-        table.innerHTML += '<tr class="subcategory"><td><strong>Operating Expenses</strong></td><td colspan="13"></td></tr>';
+        tableBody.innerHTML += '<tr class="subcategory"><td><strong>Operating Expenses</strong></td><td colspan="13"></td></tr>';
         
         const operatingExpenses = [
             { key: 'advertising', label: 'Advertising (2.5% of Revenue)' },
@@ -1066,17 +1068,17 @@
             { key: 'aaaSignup', label: 'AAA Signup (Annual)' }
         ];
         
-        table.innerHTML += generateTableSection(operatingExpenses, displayData, year, formatCurrency);
+        tableBody.innerHTML += generateTableSection(operatingExpenses, displayData, year, formatCurrency);
         
         // Periodic Expenses
-        table.innerHTML += '<tr class="subcategory"><td><strong>Periodic Expenses</strong></td><td colspan="13"></td></tr>';
+        tableBody.innerHTML += '<tr class="subcategory"><td><strong>Periodic Expenses</strong></td><td colspan="13"></td></tr>';
         
         const equipmentItems = [
             { key: 'wasteOilFilters', label: 'Waste Oil Filters (6mo)' },
             { key: 'coolantDisposal', label: 'Waste Coolant Disposal (6mo)' }
         ];
         
-        table.innerHTML += generateTableSection(equipmentItems, displayData, year, formatCurrency);
+        tableBody.innerHTML += generateTableSection(equipmentItems, displayData, year, formatCurrency);
         
         // Total Expenses
         row = '<tr class="expense-total"><td>Total Expenses</td>';
@@ -1102,7 +1104,7 @@
             });
         }
         row += `<td>${formatCurrency(grandTotalExpenses)}</td></tr>`;
-        table.innerHTML += row;
+        tableBody.innerHTML += row;
         
         // Net Income
         row = '<tr class="net-income"><td>NET INCOME</td>';
@@ -1137,7 +1139,7 @@
         }
         const totalClassName = totalNetIncome >= 0 ? 'positive' : 'negative';
         row += `<td class="${totalClassName}">${formatCurrency(totalNetIncome)}</td></tr>`;
-        table.innerHTML += row;
+        tableBody.innerHTML += row;
         
         // Cash Position (only for monthly view, not summary)
         if (year !== 'summary') {
@@ -1149,7 +1151,7 @@
             const finalCash = displayData[displayData.length - 1].cashPosition;
             const finalClassName = finalCash >= 0 ? 'positive' : 'negative';
             row += `<td class="${finalClassName}">${formatCurrency(finalCash)}</td></tr>`;
-            table.innerHTML += row;
+            tableBody.innerHTML += row;
         }
         
         // Update summary cards
