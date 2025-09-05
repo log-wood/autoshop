@@ -75,6 +75,7 @@
         aaaAnnualMembership: 400,
         monthlyFuelCard: 400,
         monthlyUtilities: 1200,
+        monthlyRent: 5000,
         monthlySuretyBond: 20,
         monthlyGeneralLiability: 200,
         
@@ -476,7 +477,7 @@
             // Calculate net income for this month
             const totalExpenses = techSalaries + detailSalaries + detailCommission + advisorSalary + managerSalary + payrollTaxes.total +
                                 advertising + config.shopKeySoftwareMonthly + (config.aaaAnnualMembership / 12) + 
-                                config.monthlyFuelCard + config.monthlyUtilities +
+                                config.monthlyFuelCard + config.monthlyUtilities + config.monthlyRent +
                                 (month % config.wasteDisposalFrequencyMonths === 0 ? config.wasteOilFiltersCost : 0) +
                                 (month % config.wasteDisposalFrequencyMonths === 0 ? config.coolantDisposalCost : 0) +
                                 oilCosts + partsCost + config.monthlyDetailSupplies + 
@@ -520,6 +521,7 @@
                 aaaSignup: config.aaaAnnualMembership / 12,
                 fuelCard: config.monthlyFuelCard,
                 utilities: config.monthlyUtilities,
+                rent: config.monthlyRent,
                 // Equipment costs moved to initial investment
                 wasteOilFilters: month % config.wasteDisposalFrequencyMonths === 0 ? config.wasteOilFiltersCost : 0,
                 coolantDisposal: month % config.wasteDisposalFrequencyMonths === 0 ? config.coolantDisposalCost : 0,
@@ -573,7 +575,7 @@
             
             const totalExpenses = m.techSalaries + m.detailSalaries + m.advisorSalary + 
                                 m.managerSalary + m.partsCost + m.totalPayrollTaxes + m.advertising + m.shopKey + 
-                                m.aaaSignup + m.fuelCard + m.utilities + 
+                                m.aaaSignup + m.fuelCard + m.utilities + m.rent +
                                 m.wasteOilFilters + m.coolantDisposal + 
                                 m.oilCosts + m.detailSupplies + m.shopSupplies + 
                                 m.suretyBond + m.liability + m.paymentProcessing + 
@@ -958,6 +960,7 @@
         
         const operatingExpenses = [
             { key: 'advertising', label: 'Advertising (2.5% of Revenue)' },
+            { key: 'rent', label: 'Rent' },
             { key: 'utilities', label: 'Utilities' },
             { key: 'shopKey', label: 'ShopKey Software' },
             { key: 'paymentProcessing', label: 'Payment Processing (2.29%)' },
