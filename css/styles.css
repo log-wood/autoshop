@@ -425,19 +425,24 @@ body {
 
 /* Table Styles */
 .table-wrapper {
+    width: 100%;
     overflow-x: auto;
-    position: relative;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
-    width: 100%;
     border-collapse: collapse;
     font-size: 0.95em;
     margin: 0;
+    width: 100%;
+    min-width: max-content;
 }
 
 thead {
-    z-index: 20;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 th {
@@ -446,7 +451,6 @@ th {
     text-align: right;
     font-weight: 600;
     color: #495057;
-    z-index: 10;
     border-bottom: 2px solid #dee2e6;
 }
 
@@ -455,7 +459,7 @@ th:first-child {
     padding-left: 15px;
     position: sticky;
     left: 0;
-    z-index: 11;
+    z-index: 3000;
     background: #f8f9fa;
 }
 
@@ -473,7 +477,7 @@ td:first-child {
     position: sticky;
     left: 0;
     background: white;
-    z-index: 5;
+    z-index: 2500;
 }
 
 tr.category-header td {
@@ -487,12 +491,16 @@ tr.category-header td {
 
 tr.category-header td:first-child {
     background: #e8f4f8;
+    position: sticky;
+    left: 0;
+    z-index: 2500;
 }
 
 tr.subcategory td:first-child {
     padding-left: 35px;
     color: #6c757d;
     background: white;
+    z-index: 2500;
 }
 
 tr.total-row td {
@@ -505,6 +513,7 @@ tr.total-row td {
 
 tr.total-row td:first-child {
     background: #d4edda;
+    z-index: 2500;
 }
 
 tr.payroll-total-row td {
@@ -517,6 +526,7 @@ tr.payroll-total-row td {
 
 tr.payroll-total-row td:first-child {
     background: #fff3cd;
+    z-index: 2500;
 }
 
 tr.expense-total td {
@@ -529,6 +539,7 @@ tr.expense-total td {
 
 tr.expense-total td:first-child {
     background: #f8d7da;
+    z-index: 2500;
 }
 
 tr.net-income td {
@@ -542,6 +553,7 @@ tr.net-income td {
 
 tr.net-income td:first-child {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    z-index: 2500;
 }
 
 tr.cash-position td {
@@ -555,6 +567,7 @@ tr.cash-position td {
 
 tr.cash-position td:first-child {
     background: linear-gradient(135deg, #2d5016 0%, #3a6b1f 100%);
+    z-index: 2500;
 }
 
 /* Editable Fields */
@@ -774,20 +787,22 @@ tr.cash-position td:first-child {
     .table-wrapper {
         position: relative;
         max-width: 100vw;
+    }
+    
+    .table-scroll {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
     
-    .table-wrapper::-webkit-scrollbar {
+    .table-scroll::-webkit-scrollbar {
         height: 6px;
-        width: 6px;
     }
     
-    .table-wrapper::-webkit-scrollbar-track {
+    .table-scroll::-webkit-scrollbar-track {
         background: #f1f1f1;
     }
     
-    .table-wrapper::-webkit-scrollbar-thumb {
+    .table-scroll::-webkit-scrollbar-thumb {
         background: #888;
         border-radius: 3px;
     }
@@ -800,12 +815,17 @@ tr.cash-position td:first-child {
     }
     
     thead {
-        z-index: 20;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
     
     th {
+        position: sticky;
+        top: 0;
         background: #f8f9fa;
-        z-index: 10;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     th, td {
@@ -818,14 +838,14 @@ tr.cash-position td:first-child {
         position: sticky;
         left: 0;
         background: white;
-        z-index: 5;
+        z-index: 2500;
         min-width: 100px;
         padding-left: 8px;
     }
     
     th:first-child {
         background: #f8f9fa;
-        z-index: 21;
+        z-index: 3000;
     }
     
     tr.category-header td:first-child {
@@ -952,6 +972,10 @@ tr.cash-position td:first-child {
     
     /* Table wrapper */
     .table-wrapper {
+        position: relative;
+    }
+    
+    .table-scroll {
         overflow-x: auto;
     }
     
@@ -961,12 +985,17 @@ tr.cash-position td:first-child {
     }
     
     thead {
-        z-index: 20;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
     
     th {
+        position: sticky;
+        top: 0;
         background: #f8f9fa;
-        z-index: 10;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     th, td {
@@ -984,7 +1013,7 @@ tr.cash-position td:first-child {
     
     th:first-child {
         background: #f8f9fa;
-        z-index: 21;
+        z-index: 1001;
     }
     
     .editable {

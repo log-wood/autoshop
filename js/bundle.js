@@ -834,7 +834,7 @@
                 const prevTotalEfficiency = data[i-1].efficiency * data[i-1].bays;
                 const currentTotalEfficiency = data[i].efficiency * data[i].bays;
                 
-                bayChanges.push(`Month ${i + 1}: Added Bay #${data[i].bays} (Total efficiency: ${currentTotalEfficiency.toFixed(0)}%)`);
+                bayChanges.push(`Month ${i + 1}: Added Tech #${data[i].bays} (Total efficiency: ${currentTotalEfficiency.toFixed(0)}%)`);
             }
             if (data[i].detailWorkers > data[i-1].detailWorkers) {
                 const currentDetailEfficiency = data[i].detailEfficiency * data[i].detailWorkers;
@@ -943,7 +943,7 @@
         
         // INITIAL INVESTMENT SECTION (only for month view, not summary)
         if (year !== 'summary') {
-            tableBody.innerHTML += '<tr class="category-header"><td colspan="14">INITIAL INVESTMENT</td></tr>';
+            tableBody.innerHTML += '<tr class="category-header"><td>INITIAL INVESTMENT</td><td colspan="13"></td></tr>';
             
             // Initial Investment row
             let investmentRow = '<tr class="subcategory"><td>Initial Startup Investment</td>';
@@ -955,7 +955,7 @@
         }
         
         // REVENUE SECTION
-        tableBody.innerHTML += '<tr class="category-header"><td colspan="14">REVENUE</td></tr>';
+        tableBody.innerHTML += '<tr class="category-header"><td>REVENUE</td><td colspan="13"></td></tr>';
         
         // Revenue items
         const revenueItems = [
@@ -996,7 +996,7 @@
         tableBody.innerHTML += row;
         
         // EXPENSES SECTION
-        tableBody.innerHTML += '<tr class="category-header"><td colspan="14">EXPENSES</td></tr>';
+        tableBody.innerHTML += '<tr class="category-header"><td>EXPENSES</td><td colspan="13"></td></tr>';
         
         // Labor Costs
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Labor Costs</strong></td><td colspan="13"></td></tr>';
@@ -1387,6 +1387,132 @@
         
         updateInputsFromConfig();
         generateProjections();
+        
+        // Setup sticky header after table is generated
+        setTimeout(() => {
+            setupStickyHeader();
+        }, 100);
+    }
+    
+    function setupStickyHeader() {
+        const tableWrapper = document.querySelector('.table-wrapper');
+        const table = document.querySelector('table');
+        const thead = document.querySelector('thead');
+        
+        if (!thead || !tableWrapper) return;
+        
+        let stickyHeader = null;
+        
+        // Create sticky header container
+        function createStickyHeader() {
+            if (stickyHeader) return stickyHeader;
+            
+            const headerClone = thead.cloneNode(true);
+            stickyHeader = document.createElement('div');
+            stickyHeader.className = 'sticky-header-container';
+            
+            const wrapperRect = tableWrapper.getBoundingClientRect();
+            
+            stickyHeader.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: ${wrapperRect.left}px;
+                width: ${wrapperRect.width}px;
+                z-index: 2000;
+                background: #f8f9fa;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                display: none;
+                overflow: hidden;
+            `;
+            
+            const innerTable = document.createElement('table');
+            innerTable.style.cssText = `
+                width: ${table.offsetWidth}px;
+                border-collapse: collapse;
+                table-layout: fixed;
+            `;
+            
+            // Copy column widths from original table
+            const originalThs = thead.querySelectorAll('th');
+            const clonedThs = headerClone.querySelectorAll('th');
+            originalThs.forEach((th, index) => {
+                if (clonedThs[index]) {
+                    clonedThs[index].style.width = `${th.offsetWidth}px`;
+                    clonedThs[index].style.minWidth = `${th.offsetWidth}px`;
+                    clonedThs[index].style.maxWidth = `${th.offsetWidth}px`;
+                }
+            });
+            
+            innerTable.appendChild(headerClone);
+            
+            stickyHeader.appendChild(innerTable);
+            document.body.appendChild(stickyHeader);
+            
+            return stickyHeader;
+        }
+        
+        // Update sticky header visibility and position  
+        function updateStickyHeader() {
+            const rect = tableWrapper.getBoundingClientRect();
+            const theadRect = thead.getBoundingClientRect();
+            
+            if (rect.top < 0 && rect.bottom > theadRect.height) {
+                // Show sticky header
+                if (!stickyHeader) {
+                    stickyHeader = createStickyHeader();
+                }
+                
+                stickyHeader.style.display = 'block';
+                
+                // Update container position and width
+                stickyHeader.style.left = `${rect.left}px`;
+                stickyHeader.style.width = `${rect.width}px`;
+                
+                // Sync column widths to ensure alignment
+                const originalThs = thead.querySelectorAll('th');
+                const clonedThs = stickyHeader.querySelectorAll('th');
+                originalThs.forEach((th, index) => {
+                    if (clonedThs[index]) {
+                        clonedThs[index].style.width = `${th.offsetWidth}px`;
+                        clonedThs[index].style.minWidth = `${th.offsetWidth}px`;
+                        clonedThs[index].style.maxWidth = `${th.offsetWidth}px`;
+                    }
+                });
+                
+                // Sync horizontal scroll
+                const innerTable = stickyHeader.querySelector('table');
+                innerTable.style.transform = `translateX(-${tableWrapper.scrollLeft}px)`;
+                innerTable.style.width = `${table.offsetWidth}px`;
+            } else {
+                // Hide sticky header
+                if (stickyHeader) {
+                    stickyHeader.style.display = 'none';
+                }
+            }
+        }
+        
+        // Event listeners
+        window.addEventListener('scroll', updateStickyHeader);
+        window.addEventListener('resize', updateStickyHeader);
+        tableWrapper.addEventListener('scroll', () => {
+            if (stickyHeader && stickyHeader.style.display === 'block') {
+                const innerTable = stickyHeader.querySelector('table');
+                innerTable.style.transform = `translateX(-${tableWrapper.scrollLeft}px)`;
+            }
+        });
+        
+        // Re-setup when table changes
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (stickyHeader) {
+                    stickyHeader.remove();
+                    stickyHeader = null;
+                }
+                setTimeout(() => {
+                    setupStickyHeader();
+                }, 100);
+            });
+        });
     }
 
     // Start the application when DOM is ready
