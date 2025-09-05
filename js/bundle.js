@@ -47,8 +47,9 @@
         maxDetailWorkers: 3,
         detailStartingEfficiency: 40,
         detailGrowthRate: 30,
-        detailHourlyRate: 15,
-        detailCommissionPercent: 40,  // Commission paid on detail revenue
+        detailHourlyWage: 15,  // What we pay detail workers per hour
+        detailChargeRate: 50,  // What we charge customers per hour for detailing
+        detailCommissionPercent: 40,  // Commission paid on detail profit
         
         // Revenue Stream Configuration
         initialUsedCars: 2,
@@ -198,7 +199,7 @@
     }
 
     // ============= CALCULATIONS MODULE =============
-    function calculatePayrollTaxes(month, totalPayroll, techCount, currentDetailWorkers, advisorSalary, managerSalary, config) {
+    function calculatePayrollTaxes(month, totalPayroll, techCount, currentDetailWorkers, advisorSalary, managerSalary, config, techHireDates, detailHireDates) {
         const year = Math.floor(month / 12) + 1;
         const monthInYear = month % 12;
         
@@ -206,17 +207,22 @@
         const seniorTechMonthlySalary = config.seniorTechAnnualSalary / 12;
         const juniorTechMonthlySalary = config.juniorTechAnnualSalary / 12;
         const techBonus = config.techAnnualBonus / 12;
-        const detailAnnualSalary = config.detailHourlyRate * 8 * 21 * 12;
+        const detailAnnualSalary = config.detailHourlyWage * 8 * 21 * 12;
         const detailMonthlySalary = detailAnnualSalary / 12;
         
-        // Calculate year-to-date wages for each employee type (for caps)
-        // monthInYear is 0-based (0-11), so add 1 for actual month number (1-12)
-        const monthsInCurrentYear = monthInYear + 1;
+        // Calculate year-to-date wages for each employee (for caps)
+        // monthInYear is 0-based (0-11), representing months completed in current year
+        const monthsInCurrentYear = monthInYear;  // Months already completed (excluding current month)
+        
+        // For consistent employees (present all year)
         const seniorTechYTD = (seniorTechMonthlySalary + techBonus) * monthsInCurrentYear;
-        const juniorTechYTD = (juniorTechMonthlySalary + techBonus) * monthsInCurrentYear;
-        const detailWorkerYTD = detailMonthlySalary * monthsInCurrentYear;
-        const advisorYTD = (advisorSalary) * monthsInCurrentYear;
-        const managerYTD = (managerSalary) * monthsInCurrentYear;
+        const advisorYTD = advisorSalary * monthsInCurrentYear;
+        const managerYTD = managerSalary * monthsInCurrentYear;
+        
+        // For employees that may be added during the year
+        // Track when each position was filled
+        const juniorTechMonthlyPay = juniorTechMonthlySalary + techBonus;
+        const detailWorkerMonthlyPay = detailMonthlySalary;
         
         // Workers' Compensation: $0.69 per $100 of total payroll
         const workersComp = totalPayroll * (config.workersCompRate / 100);
@@ -224,82 +230,135 @@
         // Social Security: 6.2% on wages up to $160,200 per employee
         let socialSecurity = 0;
         
+        // Helper function to calculate Social Security for an employee
+        const calculateSocialSecurity = (monthlyPay, ytdPay) => {
+            if (ytdPay >= config.socialSecurityWageCap) {
+                return 0; // Already hit the cap
+            }
+            const taxableAmount = Math.min(monthlyPay, config.socialSecurityWageCap - ytdPay);
+            return taxableAmount * (config.socialSecurityRate / 100);
+        };
+        
         // Senior tech
         const seniorTechThisMonth = seniorTechMonthlySalary + techBonus;
-        if (seniorTechYTD <= config.socialSecurityWageCap) {
-            const taxableAmount = Math.min(seniorTechThisMonth, config.socialSecurityWageCap - (seniorTechYTD - seniorTechThisMonth));
-            socialSecurity += taxableAmount * (config.socialSecurityRate / 100);
-        }
+        socialSecurity += calculateSocialSecurity(seniorTechThisMonth, seniorTechYTD);
         
         // Junior techs (techCount - 1)
         for (let i = 0; i < techCount - 1; i++) {
-            const juniorTechThisMonth = juniorTechMonthlySalary + techBonus;
-            if (juniorTechYTD <= config.socialSecurityWageCap) {
-                const taxableAmount = Math.min(juniorTechThisMonth, config.socialSecurityWageCap - (juniorTechYTD - juniorTechThisMonth));
-                socialSecurity += taxableAmount * (config.socialSecurityRate / 100);
+            // Calculate YTD based on when this tech was hired
+            const techIndex = i + 1; // Skip senior tech (index 0)
+            const hireMonth = techHireDates[techIndex] || 0;
+            const hireYear = Math.floor(hireMonth / 12);
+            const currentYear = Math.floor(month / 12);
+            
+            // Only count months worked in the current year
+            let monthsEmployedThisYear = 0;
+            if (hireYear === currentYear) {
+                // Hired this year - count months since hire
+                monthsEmployedThisYear = Math.max(0, monthInYear - (hireMonth % 12));
+            } else if (hireYear < currentYear) {
+                // Hired in previous year - count all months this year
+                monthsEmployedThisYear = monthInYear;
             }
+            
+            const juniorYTD = juniorTechMonthlyPay * monthsEmployedThisYear;
+            socialSecurity += calculateSocialSecurity(juniorTechMonthlyPay, juniorYTD);
         }
         
         // Detail workers
         for (let i = 0; i < currentDetailWorkers; i++) {
-            if (detailWorkerYTD <= config.socialSecurityWageCap) {
-                const taxableAmount = Math.min(detailMonthlySalary, config.socialSecurityWageCap - (detailWorkerYTD - detailMonthlySalary));
-                socialSecurity += taxableAmount * (config.socialSecurityRate / 100);
+            // Calculate YTD based on when this worker was hired
+            const hireMonth = detailHireDates[i] || 0;
+            const hireYear = Math.floor(hireMonth / 12);
+            const currentYear = Math.floor(month / 12);
+            
+            // Only count months worked in the current year
+            let monthsEmployedThisYear = 0;
+            if (hireYear === currentYear) {
+                // Hired this year - count months since hire
+                monthsEmployedThisYear = Math.max(0, monthInYear - (hireMonth % 12));
+            } else if (hireYear < currentYear) {
+                // Hired in previous year - count all months this year
+                monthsEmployedThisYear = monthInYear;
             }
+            
+            const detailYTD = detailWorkerMonthlyPay * monthsEmployedThisYear;
+            socialSecurity += calculateSocialSecurity(detailWorkerMonthlyPay, detailYTD);
         }
         
         // Service advisor
-        if (advisorYTD <= config.socialSecurityWageCap) {
-            const taxableAmount = Math.min(advisorSalary, config.socialSecurityWageCap - (advisorYTD - advisorSalary));
-            socialSecurity += taxableAmount * (config.socialSecurityRate / 100);
-        }
+        socialSecurity += calculateSocialSecurity(advisorSalary, advisorYTD);
         
         // Manager
-        if (managerYTD <= config.socialSecurityWageCap) {
-            const taxableAmount = Math.min(managerSalary, config.socialSecurityWageCap - (managerYTD - managerSalary));
-            socialSecurity += taxableAmount * (config.socialSecurityRate / 100);
-        }
+        socialSecurity += calculateSocialSecurity(managerSalary, managerYTD);
         
         // Medicare: 1.45% on all wages (no cap)
         const medicare = totalPayroll * (config.medicareRate / 100);
         
-        // FUTA: 0.6% on first $7,000 per employee
+        // FUTA: 0.6% on first $7,000 per employee per year
+        // Each employee owes max $42 per year ($7,000 * 0.6%)
         let futa = 0;
         
-        // Senior tech
-        if (seniorTechYTD <= config.futaWageCap) {
-            const taxableAmount = Math.min(seniorTechThisMonth, config.futaWageCap - (seniorTechYTD - seniorTechThisMonth));
-            futa += taxableAmount * (config.futaRate / 100);
-        }
+        // Helper function to calculate FUTA for an employee
+        const calculateFUTA = (monthlyPay, ytdPay) => {
+            if (ytdPay >= config.futaWageCap) {
+                return 0; // Already hit the cap
+            }
+            const taxableAmount = Math.min(monthlyPay, config.futaWageCap - ytdPay);
+            return taxableAmount * (config.futaRate / 100);
+        };
         
-        // Junior techs
+        // Senior tech (always present from month 1)
+        futa += calculateFUTA(seniorTechThisMonth, seniorTechYTD);
+        
+        // Junior techs - track each based on actual hire date
         for (let i = 0; i < techCount - 1; i++) {
-            const juniorTechThisMonth = juniorTechMonthlySalary + techBonus;
-            if (juniorTechYTD <= config.futaWageCap) {
-                const taxableAmount = Math.min(juniorTechThisMonth, config.futaWageCap - (juniorTechYTD - juniorTechThisMonth));
-                futa += taxableAmount * (config.futaRate / 100);
+            // Calculate YTD based on when this tech was hired
+            const techIndex = i + 1; // Skip senior tech (index 0)
+            const hireMonth = techHireDates[techIndex] || 0;
+            const hireYear = Math.floor(hireMonth / 12);
+            const currentYear = Math.floor(month / 12);
+            
+            // Only count months worked in the current year
+            let monthsEmployedThisYear = 0;
+            if (hireYear === currentYear) {
+                // Hired this year - count months since hire
+                monthsEmployedThisYear = Math.max(0, monthInYear - (hireMonth % 12));
+            } else if (hireYear < currentYear) {
+                // Hired in previous year - count all months this year
+                monthsEmployedThisYear = monthInYear;
             }
+            
+            const juniorYTD = juniorTechMonthlyPay * monthsEmployedThisYear;
+            futa += calculateFUTA(juniorTechMonthlyPay, juniorYTD);
         }
         
-        // Detail workers
+        // Detail workers - track each based on actual hire date
         for (let i = 0; i < currentDetailWorkers; i++) {
-            if (detailWorkerYTD <= config.futaWageCap) {
-                const taxableAmount = Math.min(detailMonthlySalary, config.futaWageCap - (detailWorkerYTD - detailMonthlySalary));
-                futa += taxableAmount * (config.futaRate / 100);
+            // Calculate YTD based on when this worker was hired
+            const hireMonth = detailHireDates[i] || 0;
+            const hireYear = Math.floor(hireMonth / 12);
+            const currentYear = Math.floor(month / 12);
+            
+            // Only count months worked in the current year
+            let monthsEmployedThisYear = 0;
+            if (hireYear === currentYear) {
+                // Hired this year - count months since hire
+                monthsEmployedThisYear = Math.max(0, monthInYear - (hireMonth % 12));
+            } else if (hireYear < currentYear) {
+                // Hired in previous year - count all months this year
+                monthsEmployedThisYear = monthInYear;
             }
+            
+            const detailYTD = detailWorkerMonthlyPay * monthsEmployedThisYear;
+            futa += calculateFUTA(detailWorkerMonthlyPay, detailYTD);
         }
         
-        // Service advisor
-        if (advisorYTD <= config.futaWageCap) {
-            const taxableAmount = Math.min(advisorSalary, config.futaWageCap - (advisorYTD - advisorSalary));
-            futa += taxableAmount * (config.futaRate / 100);
-        }
+        // Service advisor (always present from month 1)
+        futa += calculateFUTA(advisorSalary, advisorYTD);
         
-        // Manager
-        if (managerYTD <= config.futaWageCap) {
-            const taxableAmount = Math.min(managerSalary, config.futaWageCap - (managerYTD - managerSalary));
-            futa += taxableAmount * (config.futaRate / 100);
-        }
+        // Manager (always present from month 1)
+        futa += calculateFUTA(managerSalary, managerYTD);
         
         return {
             workersComp,
@@ -318,9 +377,22 @@
         let totalEfficiency = config.startingBays * config.startingEfficiency;
         let techCount = config.startingBays;
         
+        // Track when each tech is hired (month number)
+        // Start with initial techs (1 senior + initial juniors)
+        let techHireDates = [];
+        for (let i = 0; i < config.startingBays; i++) {
+            techHireDates.push(0); // All initial techs start at month 0
+        }
+        
         // Detail department tracking
         let currentDetailWorkers = config.startingDetailWorkers;
         let totalDetailEfficiency = config.startingDetailWorkers * config.detailStartingEfficiency;
+        
+        // Track when each detail worker is hired
+        let detailHireDates = [];
+        for (let i = 0; i < config.startingDetailWorkers; i++) {
+            detailHireDates.push(0); // Initial detail workers start at month 0
+        }
         
         // Calculate total initial investment
         const laptopsTotalCost = config.initialLaptopsQty * config.laptopUnitCost;
@@ -352,6 +424,7 @@
                     // Add a new bay and tech
                     currentBays++;
                     techCount++;
+                    techHireDates.push(month); // Track when this tech was hired
                     // Update current capacity for next iteration
                     currentCapacity = currentBays * 100;
                 }
@@ -368,6 +441,7 @@
                 while (totalDetailEfficiency >= currentDetailCapacity && currentDetailWorkers < config.maxDetailWorkers) {
                     // Add a new detail worker
                     currentDetailWorkers++;
+                    detailHireDates.push(month); // Track when this detail worker was hired
                     // Update current capacity for next iteration
                     currentDetailCapacity = currentDetailWorkers * 100;
                 }
@@ -405,8 +479,8 @@
             const usedCarSales = carSalesBase * (1 + config.usedCarGrowthPercent / 100);
             
             // Calculate detail revenue based on detail worker efficiency
-            // Each detail worker at 100% = hourly rate × 8 hours × working days
-            const maxDetailRevenuePerWorker = config.detailHourlyRate * config.operatingHoursPerDay * config.workingDays;
+            // Each detail worker at 100% = charge rate × 8 hours × working days
+            const maxDetailRevenuePerWorker = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
             const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100);
             
             // Calculate average detail efficiency for display
@@ -418,8 +492,8 @@
             const techBonus = techCount * (config.techAnnualBonus / 12); // Spread evenly across all months
             techSalaries = (config.seniorTechAnnualSalary / 12) + ((techCount - 1) * config.juniorTechAnnualSalary / 12) + techBonus;
             
-            // Calculate detail worker salaries (annual salary = hourly × 8 × 21 × 12)
-            const detailAnnualSalary = config.detailHourlyRate * 8 * 21 * 12;
+            // Calculate detail worker salaries (annual salary = hourly wage × 8 × 21 × 12)
+            const detailAnnualSalary = config.detailHourlyWage * 8 * 21 * 12;
             const detailSalaries = currentDetailWorkers * (detailAnnualSalary / 12);
             
             const advisorSalary = config.serviceAdvisorAnnualSalary / 12;
@@ -435,7 +509,7 @@
             
             // Calculate payroll taxes
             const payrollTaxes = calculatePayrollTaxes(month, totalPayroll, techCount, currentDetailWorkers, 
-                                                     advisorSalary, managerSalary, config);
+                                                     advisorSalary, managerSalary, config, techHireDates, detailHireDates);
             
             // Calculate oil costs - scales with total efficiency
             // This is the cost of oil we purchase to put in customer vehicles
@@ -509,6 +583,7 @@
                 detailSalaries: detailSalaries,
                 advisorSalary: advisorSalary,
                 managerSalary: managerSalary,
+                totalPayroll: totalPayroll,  // Total payroll before taxes
                 partsCost: partsCost,
                 // Payroll Taxes
                 workersComp: payrollTaxes.workersComp,
@@ -559,7 +634,7 @@
         let csv = 'Month,Year,Bays,Efficiency,Tech Count,Detail Workers,Detail Efficiency,Service Revenue,Parts Revenue,Shop Charge,';
         csv += 'Warranty Revenue,Oil Disposal,Disposal Fees,Battery Disposal,Used Car Sales,';
         csv += 'Detail Revenue,Total Revenue,Tech Salaries,Detail Salaries,Advisor Salary,';
-        csv += 'Manager Salary,Parts Cost,Workers Comp,Social Security,Medicare,FUTA,Total Payroll Taxes,';
+        csv += 'Manager Salary,Total Payroll,Parts Cost,Workers Comp,Social Security,Medicare,FUTA,Total Payroll Taxes,';
         csv += 'Advertising,Shop Key,AAA Signup,Fuel Card,Utilities,Rent,';
         csv += 'Waste Oil Filters,Waste Coolant Disposal,Oil Costs,';
         csv += 'Detail Supplies,Shop Supplies,Surety Bond,Liability,Payment Processing,';
@@ -591,7 +666,7 @@
             csv += `${m.usedCarSales.toFixed(0)},${m.detailRevenue.toFixed(0)},`;
             csv += `${totalRevenue.toFixed(0)},`;
             csv += `${m.techSalaries.toFixed(0)},${m.detailSalaries.toFixed(0)},${m.advisorSalary.toFixed(0)},`;
-            csv += `${m.managerSalary.toFixed(0)},${m.partsCost.toFixed(0)},${m.workersComp.toFixed(0)},${m.socialSecurity.toFixed(0)},`;
+            csv += `${m.managerSalary.toFixed(0)},${m.totalPayroll.toFixed(0)},${m.partsCost.toFixed(0)},${m.workersComp.toFixed(0)},${m.socialSecurity.toFixed(0)},`;
             csv += `${m.medicare.toFixed(0)},${m.futa.toFixed(0)},${m.totalPayrollTaxes.toFixed(0)},`;
             csv += `${m.advertising.toFixed(0)},`;
             csv += `${m.shopKey.toFixed(0)},${m.aaaSignup.toFixed(0)},`;
@@ -806,8 +881,8 @@
         const totals = {};
         const keys = ['serviceRevenue', 'partsRevenue', 'detailRevenue', 'usedCarSales', 'shopCharge', 
                      'warrantyRevenue', 'oilDisposal', 'disposalFees', 'batteryDisposal',
-                     'oilCosts', 'partsCost', 'techSalaries', 'detailSalaries', 'advisorSalary', 'managerSalary', 
-                     'workersComp', 'socialSecurity', 'medicare', 'futa', 'totalPayrollTaxes',
+                     'oilCosts', 'partsCost', 'techSalaries', 'detailSalaries', 'advisorSalary', 'managerSalary',
+                     'totalPayroll', 'workersComp', 'socialSecurity', 'medicare', 'futa', 'totalPayrollTaxes',
                      'advertising', 'rent', 'utilities', 'shopKey', 'paymentProcessing', 'detailCommission', 'fuelCard', 'detailSupplies', 'shopSupplies',
                      'suretyBond', 'liability', 'aaaSignup', 'wasteOilFilters', 'coolantDisposal'];
                      
@@ -921,16 +996,6 @@
         // EXPENSES SECTION
         table.innerHTML += '<tr class="category-header"><td colspan="14">EXPENSES</td></tr>';
         
-        // Cost of Goods Sold
-        table.innerHTML += '<tr class="subcategory"><td><strong>Cost of Goods Sold</strong></td><td colspan="13"></td></tr>';
-        
-        const cogsItems = [
-            { key: 'oilCosts', label: 'Oil Costs (Per Bay)' },
-            { key: 'partsCost', label: 'Parts Cost (50% of Parts Revenue)' }
-        ];
-        
-        table.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency);
-        
         // Labor Costs
         table.innerHTML += '<tr class="subcategory"><td><strong>Labor Costs</strong></td><td colspan="13"></td></tr>';
         
@@ -942,6 +1007,34 @@
         ];
         
         table.innerHTML += generateTableSection(laborItems, displayData, year, formatCurrency);
+        
+        // Add Total Payroll row
+        let totalPayrollRow = '<tr class="payroll-total-row"><td>Total Payroll</td>';
+        if (year === 'summary') {
+            displayData.forEach(yearData => {
+                const yearTotal = yearData.totalPayroll || (yearData.techSalaries + yearData.detailSalaries + yearData.advisorSalary + yearData.managerSalary);
+                totalPayrollRow += `<td>${formatCurrency(yearTotal)}</td>`;
+            });
+        } else {
+            displayData.forEach(m => {
+                const monthTotal = m.totalPayroll || (m.techSalaries + m.detailSalaries + m.advisorSalary + m.managerSalary);
+                totalPayrollRow += `<td>${formatCurrency(monthTotal)}</td>`;
+            });
+        }
+        totalPayrollRow += '<td>' + formatCurrency(displayData.reduce((sum, item) => {
+            return sum + (item.totalPayroll || (item.techSalaries + item.detailSalaries + item.advisorSalary + item.managerSalary));
+        }, 0)) + '</td></tr>';
+        table.innerHTML += totalPayrollRow;
+        
+        // Cost of Goods Sold
+        table.innerHTML += '<tr class="subcategory"><td><strong>Cost of Goods Sold</strong></td><td colspan="13"></td></tr>';
+        
+        const cogsItems = [
+            { key: 'oilCosts', label: 'Oil Costs (Per Bay)' },
+            { key: 'partsCost', label: 'Parts Cost (50% of Parts Revenue)' }
+        ];
+        
+        table.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency);
         
         // Payroll Taxes
         table.innerHTML += '<tr class="subcategory"><td><strong>Payroll Taxes</strong></td><td colspan="13"></td></tr>';
@@ -964,7 +1057,7 @@
             { key: 'utilities', label: 'Utilities' },
             { key: 'shopKey', label: 'ShopKey Software' },
             { key: 'paymentProcessing', label: 'Payment Processing (2.29%)' },
-            { key: 'detailCommission', label: 'Detail Commission (40% of Detail Revenue)' },
+            { key: 'detailCommission', label: 'Detail Commission (40% of Detail Profit)' },
             { key: 'fuelCard', label: 'Fuel Card' },
             { key: 'detailSupplies', label: 'Detail Supplies' },
             { key: 'shopSupplies', label: 'Shop Supplies/Misc' },

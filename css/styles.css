@@ -489,6 +489,14 @@ tr.total-row td {
     border-bottom: 2px solid #28a745;
 }
 
+tr.payroll-total-row td {
+    background: #fff3cd;
+    font-weight: 700;
+    color: #856404;
+    border-top: 2px solid #ffc107;
+    border-bottom: 2px solid #ffc107;
+}
+
 tr.expense-total td {
     background: #f8d7da;
     font-weight: 700;
