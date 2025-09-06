@@ -132,7 +132,7 @@ body {
 }
 
 .container {
-    max-width: 100%;
+    max-width: 1900px;
     width: 100%;
     margin: 0 auto;
     background: white;
@@ -453,14 +453,19 @@ th {
     font-weight: 600;
     color: #495057;
     border-bottom: 2px solid #dee2e6;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
 }
 
 th:first-child {
     text-align: left;
     padding-left: 15px;
+    position: -webkit-sticky;
     position: sticky;
     left: 0;
-    z-index: 3000;
+    top: 0;
+    z-index: 5000;
     background: #f8f9fa;
 }
 
@@ -478,7 +483,7 @@ td:first-child {
     position: sticky;
     left: 0;
     background: white;
-    z-index: 2500;
+    z-index: 1999;
 }
 
 tr.category-header td {
@@ -494,14 +499,14 @@ tr.category-header td:first-child {
     background: #e8f4f8;
     position: sticky;
     left: 0;
-    z-index: 2500;
+    z-index: 2000;
 }
 
 tr.subcategory td:first-child {
     padding-left: 35px;
     color: #6c757d;
     background: white;
-    z-index: 2500;
+    z-index: 2000;
 }
 
 tr.total-row td {
@@ -514,7 +519,7 @@ tr.total-row td {
 
 tr.total-row td:first-child {
     background: #d4edda;
-    z-index: 2500;
+    z-index: 2000;
 }
 
 tr.payroll-total-row td {
@@ -527,7 +532,7 @@ tr.payroll-total-row td {
 
 tr.payroll-total-row td:first-child {
     background: #fff3cd;
-    z-index: 2500;
+    z-index: 2000;
 }
 
 tr.expense-total td {
@@ -540,7 +545,7 @@ tr.expense-total td {
 
 tr.expense-total td:first-child {
     background: #f8d7da;
-    z-index: 2500;
+    z-index: 2000;
 }
 
 tr.net-income td {
@@ -554,7 +559,7 @@ tr.net-income td {
 
 tr.net-income td:first-child {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    z-index: 2500;
+    z-index: 2000;
 }
 
 tr.cash-position td {
@@ -568,7 +573,7 @@ tr.cash-position td {
 
 tr.cash-position td:first-child {
     background: linear-gradient(135deg, #2d5016 0%, #3a6b1f 100%);
-    z-index: 2500;
+    z-index: 2000;
 }
 
 /* Editable Fields */
@@ -839,7 +844,7 @@ tr.cash-position td:first-child {
         position: sticky;
         left: 0;
         background: white;
-        z-index: 2500;
+        z-index: 2000;
         min-width: 100px;
         padding-left: 8px;
     }

@@ -1024,8 +1024,8 @@
             { key: 'partsRevenue', label: 'Parts Department Revenue' },
             { key: 'detailRevenue', label: 'Detail Department' },
             { key: 'usedCarSales', label: 'Used Car Sales' },
-            { key: 'shopCharge', label: 'Shop Charge (7% capped $60)' },
-            { key: 'warrantyRevenue', label: 'Extended Warranties (% of Work Orders)' },
+            { key: 'shopCharge', label: 'Shop Charge' },
+            { key: 'warrantyRevenue', label: 'Extended Warranties' },
             { key: 'oilDisposal', label: 'Oil Disposal' },
             { key: 'disposalFees', label: 'Disposal Fees' },
             { key: 'batteryDisposal', label: 'Battery Disposal' }
@@ -1093,8 +1093,8 @@
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Cost of Goods Sold</strong></td><td colspan="13"></td></tr>';
         
         const cogsItems = [
-            { key: 'oilCosts', label: 'Oil Costs (Per Bay)' },
-            { key: 'partsCost', label: 'Parts Cost (50% of Parts Revenue)' }
+            { key: 'oilCosts', label: 'Oil Costs' },
+            { key: 'partsCost', label: 'Parts Cost' }
         ];
         
         tableBody.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency);
@@ -1103,10 +1103,10 @@
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Payroll Taxes</strong></td><td colspan="13"></td></tr>';
         
         const payrollTaxItems = [
-            { key: 'workersComp', label: 'Workers\' Compensation ($0.69 per $100)' },
-            { key: 'socialSecurity', label: 'Social Security (6.2% up to $160,200)' },
-            { key: 'medicare', label: 'Medicare (1.45% all wages)' },
-            { key: 'futa', label: 'Federal Unemployment (0.6% first $7,000)' }
+            { key: 'workersComp', label: 'Workers\' Compensation' },
+            { key: 'socialSecurity', label: 'Social Security' },
+            { key: 'medicare', label: 'Medicare' },
+            { key: 'futa', label: 'Federal Unemployment' }
         ];
         
         tableBody.innerHTML += generateTableSection(payrollTaxItems, displayData, year, formatCurrency);
@@ -1115,12 +1115,12 @@
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Operating Expenses</strong></td><td colspan="13"></td></tr>';
         
         const operatingExpenses = [
-            { key: 'advertising', label: 'Advertising (2.5% of Revenue)' },
+            { key: 'advertising', label: 'Advertising' },
             { key: 'rent', label: 'Rent' },
             { key: 'utilities', label: 'Utilities' },
             { key: 'shopKey', label: 'ShopKey Software' },
-            { key: 'paymentProcessing', label: 'Payment Processing (2.29%)' },
-            { key: 'detailCommission', label: 'Detail Commission (40% of Detail Profit)' },
+            { key: 'paymentProcessing', label: 'Payment Processing' },
+            { key: 'detailCommission', label: 'Detail Commission' },
             { key: 'fuelCard', label: 'Fuel Card' },
             { key: 'detailSupplies', label: 'Detail Supplies' },
             { key: 'shopSupplies', label: 'Shop Supplies/Misc' },
@@ -1523,9 +1523,18 @@
             
             // Remove the sticky positioning from cloned headers to prevent conflicts
             const clonedThs = headerClone.querySelectorAll('th');
-            clonedThs.forEach(th => {
-                th.style.position = 'relative';
-                th.style.top = 'auto';
+            clonedThs.forEach((th, index) => {
+                if (index === 0) {
+                    // First th (Category) needs sticky left positioning
+                    th.style.position = 'sticky';
+                    th.style.left = '0';
+                    th.style.top = '0';
+                    th.style.zIndex = '5000';
+                    th.style.background = '#f8f9fa';
+                } else {
+                    th.style.position = 'sticky';
+                    th.style.top = '0';
+                }
             });
             
             stickyHeader = document.createElement('div');
@@ -1542,12 +1551,14 @@
                 background: #f8f9fa;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 display: none;
-                overflow: hidden;
+                overflow-x: visible;
+                overflow-y: hidden;
             `;
             
             const innerWrapper = document.createElement('div');
             innerWrapper.style.cssText = `
-                overflow: hidden;
+                overflow-x: auto;
+                overflow-y: hidden;
                 width: 100%;
             `;
             
@@ -1592,7 +1603,7 @@
                     if (index === 0) {
                         th.style.position = 'sticky';
                         th.style.left = '0';
-                        th.style.zIndex = '3000';
+                        th.style.zIndex = '5000';
                         th.style.textAlign = 'left';
                     }
                 }
@@ -1638,6 +1649,15 @@
                 const innerTable = stickyHeader.querySelector('table');
                 innerTable.style.transform = `translateX(-${tableWrapper.scrollLeft}px)`;
                 innerTable.style.width = `${table.offsetWidth}px`;
+                
+                // Counter-translate the category header to keep it fixed
+                const firstTh = innerTable.querySelector('th:first-child');
+                if (firstTh) {
+                    firstTh.style.transform = `translateX(${tableWrapper.scrollLeft}px)`;
+                    firstTh.style.position = 'relative';
+                    firstTh.style.zIndex = '5001';
+                    firstTh.style.background = '#f8f9fa';
+                }
             } else {
                 // Hide sticky header
                 if (stickyHeader) {
@@ -1653,6 +1673,12 @@
             if (stickyHeader && stickyHeader.style.display === 'block') {
                 const innerTable = stickyHeader.querySelector('table');
                 innerTable.style.transform = `translateX(-${tableWrapper.scrollLeft}px)`;
+                
+                // Counter-translate the category header to keep it fixed
+                const firstTh = innerTable.querySelector('th:first-child');
+                if (firstTh) {
+                    firstTh.style.transform = `translateX(${tableWrapper.scrollLeft}px)`;
+                }
             }
         };
         
