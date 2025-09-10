@@ -99,6 +99,10 @@
         futaRate: 0.6, // 0.6% on first $7,000 per employee
         futaWageCap: 7000, // Annual cap per employee
         
+        // Income Tax Configuration
+        federalIncomeTaxRate: 21, // 21% federal corporate tax rate
+        wvStateTaxRate: 6.5, // 6.5% WV corporate tax rate
+        
         // Essential Calculation Formulas
         paymentProcessFormula: 'percentPlusTransaction',
         
@@ -613,8 +617,19 @@
                                 shopSupplies + config.monthlySuretyBond + config.monthlyGeneralLiability +
                                 paymentProcessing;
             
-            const netIncome = totalRevenue - totalExpenses;
-            runningCashPosition += netIncome;
+            const netIncomeBeforeTax = totalRevenue - totalExpenses;
+            
+            // Calculate income taxes (only on positive income)
+            let federalIncomeTax = 0;
+            let wvStateTax = 0;
+            if (netIncomeBeforeTax > 0) {
+                federalIncomeTax = netIncomeBeforeTax * (config.federalIncomeTaxRate / 100);
+                wvStateTax = netIncomeBeforeTax * (config.wvStateTaxRate / 100);
+            }
+            const totalIncomeTax = federalIncomeTax + wvStateTax;
+            const netIncomeAfterTax = netIncomeBeforeTax - totalIncomeTax;
+            
+            runningCashPosition += netIncomeAfterTax;
             
             months.push({
                 month: month + 1,
@@ -666,8 +681,13 @@
                 detailCommission: detailCommission,
                 // Equipment costs handled in initial investment only
                 workOrders: workOrders,
+                // Income taxes
+                federalIncomeTax: federalIncomeTax,
+                wvStateTax: wvStateTax,
+                totalIncomeTax: totalIncomeTax,
                 // Financial tracking
-                netIncome: netIncome,
+                netIncomeBeforeTax: netIncomeBeforeTax,
+                netIncome: netIncomeAfterTax,  // This is now after-tax
                 cashPosition: runningCashPosition,
                 initialInvestment: month === 0 ? totalInitialInvestment : 0
             });
@@ -694,7 +714,7 @@
         csv += 'Advertising,Shop Key,AAA Signup,Fuel Card,Utilities,Rent,';
         csv += 'Waste Oil Filters,Waste Coolant Disposal,Oil Costs,';
         csv += 'Detail Supplies,Shop Supplies,Surety Bond,Liability,Payment Processing,';
-        csv += 'Detail Commission,Total Expenses,Net Income\n';
+        csv += 'Detail Commission,Total Expenses,Income Before Tax,Federal Income Tax,WV State Tax,Total Income Tax,Net Income After Tax\n';
         
         data.forEach((m, index) => {
             const year = Math.floor(index / 12) + 1;
@@ -711,8 +731,6 @@
                                 m.oilCosts + m.detailSupplies + m.shopSupplies + 
                                 m.suretyBond + m.liability + m.paymentProcessing + 
                                 m.detailCommission;
-            
-            const netIncome = totalRevenue - totalExpenses;
             
             csv += `${monthInYear},${year},${m.bays},${m.efficiency.toFixed(1)},${m.techCount},`;
             csv += `${m.detailWorkers},${m.detailEfficiency.toFixed(1)},`;
@@ -733,7 +751,9 @@
             csv += `${m.shopSupplies.toFixed(0)},${m.suretyBond.toFixed(0)},`;
             csv += `${m.liability.toFixed(0)},${m.paymentProcessing.toFixed(0)},`;
             csv += `${m.detailCommission.toFixed(0)},`;
-            csv += `${totalExpenses.toFixed(0)},${netIncome.toFixed(0)}\n`;
+            csv += `${totalExpenses.toFixed(0)},${m.netIncomeBeforeTax.toFixed(0)},`;
+            csv += `${m.federalIncomeTax.toFixed(0)},${m.wvStateTax.toFixed(0)},`;
+            csv += `${m.totalIncomeTax.toFixed(0)},${m.netIncome.toFixed(0)}\n`;
         });
         
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -940,7 +960,8 @@
                      'oilCosts', 'partsCost', 'techSalaries', 'detailSalaries', 'advisorSalary', 'managerSalary',
                      'totalPayroll', 'workersComp', 'socialSecurity', 'medicare', 'futa', 'totalPayrollTaxes',
                      'advertising', 'rent', 'utilities', 'shopKey', 'paymentProcessing', 'detailCommission', 'fuelCard', 'detailSupplies', 'shopSupplies',
-                     'suretyBond', 'liability', 'aaaSignup', 'wasteOilFilters', 'coolantDisposal'];
+                     'suretyBond', 'liability', 'aaaSignup', 'wasteOilFilters', 'coolantDisposal',
+                     'federalIncomeTax', 'wvStateTax', 'totalIncomeTax', 'netIncomeBeforeTax', 'netIncome'];
                      
         keys.forEach(key => {
             totals[key] = yearData.reduce((sum, month) => sum + month[key], 0);
@@ -1167,39 +1188,90 @@
         row += `<td>${formatCurrency(grandTotalExpenses)}</td></tr>`;
         tableBody.innerHTML += row;
         
-        // Net Income
-        row = '<tr class="net-income"><td>NET INCOME</td>';
+        // Income Before Tax
+        row = '<tr class="net-income"><td>INCOME BEFORE TAX</td>';
+        let totalIncomeBeforeTax = 0;
+        
+        if (year === 'summary') {
+            displayData.forEach(yearData => {
+                const incomeBeforeTax = yearData.netIncomeBeforeTax || 0;
+                totalIncomeBeforeTax += incomeBeforeTax;
+                const className = incomeBeforeTax >= 0 ? 'positive' : 'negative';
+                row += `<td class="${className}">${formatCurrency(incomeBeforeTax)}</td>`;
+            });
+        } else {
+            displayData.forEach(m => {
+                const incomeBeforeTax = m.netIncomeBeforeTax || 0;
+                totalIncomeBeforeTax += incomeBeforeTax;
+                const className = incomeBeforeTax >= 0 ? 'positive' : 'negative';
+                row += `<td class="${className}">${formatCurrency(incomeBeforeTax)}</td>`;
+            });
+        }
+        const totalClassName = totalIncomeBeforeTax >= 0 ? 'positive' : 'negative';
+        row += `<td class="${totalClassName}">${formatCurrency(totalIncomeBeforeTax)}</td></tr>`;
+        tableBody.innerHTML += row;
+        
+        // Federal Income Tax
+        row = '<tr class="subcategory"><td>Federal Income Tax (21%)</td>';
+        let totalFederalTax = 0;
+        
+        if (year === 'summary') {
+            displayData.forEach(yearData => {
+                const federalTax = yearData.federalIncomeTax || 0;
+                totalFederalTax += federalTax;
+                row += `<td>${formatCurrency(federalTax)}</td>`;
+            });
+        } else {
+            displayData.forEach(m => {
+                const federalTax = m.federalIncomeTax || 0;
+                totalFederalTax += federalTax;
+                row += `<td>${formatCurrency(federalTax)}</td>`;
+            });
+        }
+        row += `<td>${formatCurrency(totalFederalTax)}</td></tr>`;
+        tableBody.innerHTML += row;
+        
+        // WV State Tax
+        row = '<tr class="subcategory"><td>WV State Tax (6.5%)</td>';
+        let totalStateTax = 0;
+        
+        if (year === 'summary') {
+            displayData.forEach(yearData => {
+                const stateTax = yearData.wvStateTax || 0;
+                totalStateTax += stateTax;
+                row += `<td>${formatCurrency(stateTax)}</td>`;
+            });
+        } else {
+            displayData.forEach(m => {
+                const stateTax = m.wvStateTax || 0;
+                totalStateTax += stateTax;
+                row += `<td>${formatCurrency(stateTax)}</td>`;
+            });
+        }
+        row += `<td>${formatCurrency(totalStateTax)}</td></tr>`;
+        tableBody.innerHTML += row;
+        
+        // Net Income After Tax
+        row = '<tr class="net-income"><td>NET INCOME AFTER TAX</td>';
         let totalNetIncome = 0;
         
         if (year === 'summary') {
             displayData.forEach(yearData => {
-                const yearRevenue = yearData.serviceRevenue + yearData.partsRevenue + yearData.detailRevenue + yearData.usedCarSales + 
-                                  yearData.shopCharge + yearData.warrantyRevenue + yearData.oilDisposal + yearData.disposalFees + yearData.batteryDisposal;
-                const yearExpenses = yearData.oilCosts + yearData.partsCost + yearData.techSalaries + yearData.detailSalaries + yearData.advisorSalary + 
-                                   yearData.managerSalary + yearData.totalPayrollTaxes + yearData.advertising + yearData.rent + yearData.utilities + yearData.shopKey + 
-                                   yearData.paymentProcessing + yearData.detailCommission + yearData.fuelCard + yearData.detailSupplies + yearData.shopSupplies + 
-                                   yearData.suretyBond + yearData.liability + yearData.aaaSignup + yearData.wasteOilFilters + yearData.coolantDisposal;
-                const netIncome = yearRevenue - yearExpenses;
+                const netIncome = yearData.netIncome || 0;
                 totalNetIncome += netIncome;
                 const className = netIncome >= 0 ? 'positive' : 'negative';
                 row += `<td class="${className}">${formatCurrency(netIncome)}</td>`;
             });
         } else {
             displayData.forEach(m => {
-                const monthRevenue = m.serviceRevenue + m.partsRevenue + m.detailRevenue + m.usedCarSales + 
-                                   m.shopCharge + m.warrantyRevenue + m.oilDisposal + m.disposalFees + m.batteryDisposal;
-                const monthExpenses = m.oilCosts + m.partsCost + m.techSalaries + m.detailSalaries + m.advisorSalary + 
-                                    m.managerSalary + m.totalPayrollTaxes + m.advertising + m.rent + m.utilities + m.shopKey + 
-                                    m.paymentProcessing + m.detailCommission + m.fuelCard + m.detailSupplies + m.shopSupplies + 
-                                    m.suretyBond + m.liability + m.aaaSignup + m.wasteOilFilters + m.coolantDisposal;
-                const netIncome = monthRevenue - monthExpenses;
+                const netIncome = m.netIncome || 0;
                 totalNetIncome += netIncome;
                 const className = netIncome >= 0 ? 'positive' : 'negative';
                 row += `<td class="${className}">${formatCurrency(netIncome)}</td>`;
             });
         }
-        const totalClassName = totalNetIncome >= 0 ? 'positive' : 'negative';
-        row += `<td class="${totalClassName}">${formatCurrency(totalNetIncome)}</td></tr>`;
+        const netIncomeClassName = totalNetIncome >= 0 ? 'positive' : 'negative';
+        row += `<td class="${netIncomeClassName}">${formatCurrency(totalNetIncome)}</td></tr>`;
         tableBody.innerHTML += row;
         
         // Cash Position (only for monthly view, not summary)
