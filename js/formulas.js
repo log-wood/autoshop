@@ -213,7 +213,7 @@
 
     function populateDetailRevenueExample(config) {
         const totalDetailEfficiency = config.startingDetailWorkers * config.detailStartingEfficiency;
-        const maxDetailRevenuePerWorker = config.detailHourlyRate * config.operatingHoursPerDay * config.workingDays;
+        const maxDetailRevenuePerWorker = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
         const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100);
         
         const element = document.getElementById('detailRevenueExample');
@@ -221,8 +221,8 @@
             element.innerHTML = `
                 <strong>Example - Month 1:</strong><br>
                 Total Detail Efficiency = ${config.startingDetailWorkers} workers × ${formatPercent(config.detailStartingEfficiency)} = ${formatPercent(totalDetailEfficiency)}<br>
-                Detail Revenue = ${formatCurrency(config.detailHourlyRate)} × ${config.operatingHoursPerDay} hrs × ${config.workingDays} days × (${formatPercent(totalDetailEfficiency)} ÷ 100)<br>
-                = ${formatCurrency(config.detailHourlyRate)} × ${config.operatingHoursPerDay} × ${config.workingDays} × ${(totalDetailEfficiency/100).toFixed(2)}<br>
+                Detail Revenue = ${formatCurrency(config.detailChargeRate)} × ${config.operatingHoursPerDay} hrs × ${config.workingDays} days × (${formatPercent(totalDetailEfficiency)} ÷ 100)<br>
+                = ${formatCurrency(config.detailChargeRate)} × ${config.operatingHoursPerDay} × ${config.workingDays} × ${(totalDetailEfficiency/100).toFixed(2)}<br>
                 = <strong>${formatCurrency(detailRevenue)}</strong>
             `;
         }
@@ -319,9 +319,10 @@
 
     function populateDisposalFeesExample(config) {
         const totalEfficiency = config.startingBays * config.startingEfficiency;
+        const currentBays = config.startingBays;
         const oilDisposal = config.oilDisposalFee * (totalEfficiency / 100);
         const generalDisposal = config.generalDisposalFee * (totalEfficiency / 100);
-        const batteryDisposal = config.batteryDisposalFee * (totalEfficiency / 100);
+        const batteryDisposal = config.batteryDisposalFee * currentBays * (totalEfficiency / 100);
         
         const element = document.getElementById('disposalFeesExample');
         if (element) {
@@ -330,7 +331,7 @@
                 Total Efficiency = ${formatPercent(totalEfficiency)}<br>
                 Oil Disposal = ${formatCurrency(config.oilDisposalFee)} × (${formatPercent(totalEfficiency)} ÷ 100) = ${formatCurrency(oilDisposal)}<br>
                 General Disposal = ${formatCurrency(config.generalDisposalFee)} × (${formatPercent(totalEfficiency)} ÷ 100) = ${formatCurrency(generalDisposal)}<br>
-                Battery Disposal = ${formatCurrency(config.batteryDisposalFee)} × (${formatPercent(totalEfficiency)} ÷ 100) = <strong>${formatCurrency(batteryDisposal)}</strong>
+                Battery Disposal = ${formatCurrency(config.batteryDisposalFee)} × ${currentBays} bays × (${formatPercent(totalEfficiency)} ÷ 100) = <strong>${formatCurrency(batteryDisposal)}</strong>
             `;
         }
     }
@@ -354,14 +355,14 @@
     }
 
     function populateDetailSalariesExample(config) {
-        const detailAnnualSalary = config.detailHourlyRate * 8 * 21 * 12;
+        const detailAnnualSalary = config.detailHourlyWage * 8 * 21 * 12;
         const detailSalaries = config.startingDetailWorkers * (detailAnnualSalary / 12);
         
         const element = document.getElementById('detailSalariesExample');
         if (element) {
             element.innerHTML = `
                 <strong>Example - Month 1:</strong><br>
-                Detail Annual Salary = ${formatCurrency(config.detailHourlyRate)} × 8 hrs × 21 days × 12 months = ${formatCurrency(detailAnnualSalary)}<br>
+                Detail Annual Salary = ${formatCurrency(config.detailHourlyWage)} × 8 hrs × 21 days × 12 months = ${formatCurrency(detailAnnualSalary)}<br>
                 Detail Salaries = ${config.startingDetailWorkers} workers × (${formatCurrency(detailAnnualSalary)} ÷ 12) = <strong>${formatCurrency(detailSalaries)}</strong>
             `;
         }
@@ -383,7 +384,7 @@
 
     function populateDetailCommissionExample(config) {
         const totalDetailEfficiency = config.startingDetailWorkers * config.detailStartingEfficiency;
-        const maxDetailRevenuePerWorker = config.detailHourlyRate * config.operatingHoursPerDay * config.workingDays;
+        const maxDetailRevenuePerWorker = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
         const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100);
         const detailCommission = detailRevenue * (config.detailCommissionPercent / 100);
         
@@ -478,7 +479,7 @@
         const partsRevenue = serviceRevenue * (config.partsRevenuePercent / 100);
         
         const totalDetailEfficiency = config.startingDetailWorkers * config.detailStartingEfficiency;
-        const maxDetailRevenuePerWorker = config.detailHourlyRate * config.operatingHoursPerDay * config.workingDays;
+        const maxDetailRevenuePerWorker = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
         const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100);
         
         const usedCarSales = config.initialUsedCars * config.profitPerUsedCar;
@@ -488,7 +489,7 @@
         const warrantyRevenue = Math.floor(workOrders * (config.warrantyPercent / 100)) * config.warrantyPrice;
         const oilDisposal = config.oilDisposalFee * (totalEfficiency / 100);
         const generalDisposal = config.generalDisposalFee * (totalEfficiency / 100);
-        const batteryDisposal = config.batteryDisposalFee * (totalEfficiency / 100);
+        const batteryDisposal = config.batteryDisposalFee * config.startingBays * (totalEfficiency / 100);
         
         const totalRevenue = serviceRevenue + partsRevenue + detailRevenue + usedCarSales + 
                            shopCharge + warrantyRevenue + oilDisposal + generalDisposal + batteryDisposal;
@@ -512,7 +513,7 @@
         const techBonus = techCount * (config.techAnnualBonus / 12);
         const techSalaries = (config.seniorTechAnnualSalary / 12) + ((techCount - 1) * config.juniorTechAnnualSalary / 12) + techBonus;
         
-        const detailAnnualSalary = config.detailHourlyRate * 8 * 21 * 12;
+        const detailAnnualSalary = config.detailHourlyWage * 8 * 21 * 12;
         const detailSalaries = config.startingDetailWorkers * (detailAnnualSalary / 12);
         const advisorSalary = config.serviceAdvisorAnnualSalary / 12;
         const managerSalary = config.managerAnnualSalary / 12;
@@ -522,7 +523,7 @@
         
         // Calculate detail commission
         const totalDetailEfficiency = config.startingDetailWorkers * config.detailStartingEfficiency;
-        const maxDetailRevenuePerWorker = config.detailHourlyRate * config.operatingHoursPerDay * config.workingDays;
+        const maxDetailRevenuePerWorker = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
         const detailRevenue = maxDetailRevenuePerWorker * (totalDetailEfficiency / 100);
         const detailCommission = detailRevenue * (config.detailCommissionPercent / 100);
         

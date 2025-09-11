@@ -582,7 +582,7 @@
             // We also sell the waste oil, generating additional revenue
             let oilDisposal = config.oilDisposalFee * (totalEfficiency / 100) * monthlyMultiplier;
             let generalDisposal = config.generalDisposalFee * (totalEfficiency / 100) * monthlyMultiplier;
-            let batteryDisposal = config.batteryDisposalFee * currentBays * monthlyMultiplier;
+            let batteryDisposal = config.batteryDisposalFee * currentBays * (totalEfficiency / 100) * monthlyMultiplier;
 
             // Calculate total revenue
             const totalRevenue = serviceRevenue + partsRevenue + shopCharge + warrantyRevenue + 
