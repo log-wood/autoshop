@@ -608,6 +608,67 @@ tr.cash-position td:first-child {
     color: #dc3545;
 }
 
+/* Calculation Tooltip Styles */
+.calculation-tooltip {
+    position: fixed;
+    background: rgba(30, 30, 30, 0.95);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    line-height: 1.6;
+    max-width: 400px;
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: none;
+}
+
+.calculation-tooltip.visible {
+    display: block;
+}
+
+.calculation-tooltip .formula-title {
+    font-weight: 700;
+    color: #4fc3f7;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 6px;
+}
+
+.calculation-tooltip .formula-line {
+    margin: 4px 0;
+    font-family: 'Courier New', monospace;
+    color: #e0e0e0;
+}
+
+.calculation-tooltip .formula-result {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-weight: 600;
+    color: #81c784;
+}
+
+.calculation-tooltip .formula-note {
+    margin-top: 6px;
+    font-size: 0.9em;
+    color: #ffb74d;
+    font-style: italic;
+}
+
+.has-tooltip {
+    cursor: help;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.has-tooltip:hover {
+    background-color: rgba(42, 82, 152, 0.05);
+}
+
 /* Summary Cards */
 .summary-cards {
     display: grid;

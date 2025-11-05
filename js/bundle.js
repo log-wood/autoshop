@@ -970,15 +970,18 @@
         return totals;
     }
 
-    function generateTableSection(items, displayData, year, formatCurrency) {
+    function generateTableSection(items, displayData, year, formatCurrency, startMonthIndex = 0) {
         let html = '';
         items.forEach(item => {
             let row = `<tr class="subcategory"><td>${item.label}</td>`;
             let total = 0;
-            
-            displayData.forEach(dataPoint => {
+
+            displayData.forEach((dataPoint, index) => {
                 const value = dataPoint[item.key] || 0;
-                row += `<td>${formatCurrency(value)}</td>`;
+                const monthIndex = year === 'summary' ? null : startMonthIndex + index;
+                const tooltipAttrs = monthIndex !== null ?
+                    `class="has-tooltip" data-metric="${item.key}" data-month="${monthIndex}" data-value="${value}"` : '';
+                row += `<td ${tooltipAttrs}>${formatCurrency(value)}</td>`;
                 total += value;
             });
             row += `<td>${formatCurrency(total)}</td></tr>`;
@@ -992,9 +995,9 @@
         const tableBody = document.getElementById('plTable');
         tableHead.innerHTML = '';
         tableBody.innerHTML = '';
-        
-        let startMonth, endMonth, displayData;
-        
+
+        let startMonth, endMonth, displayData, startMonthIndex;
+
         // Month name arrays
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
@@ -1002,17 +1005,19 @@
             // Show yearly totals for 3-year summary
             displayData = [
                 calculateYearlyTotals(data, 1),
-                calculateYearlyTotals(data, 2), 
+                calculateYearlyTotals(data, 2),
                 calculateYearlyTotals(data, 3)
             ];
+            startMonthIndex = null; // No month index for summary view
             let headerRow = '<tr><th>Category</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>3-Year Total</th></tr>';
             tableHead.innerHTML = headerRow;
         } else {
             // Show monthly data for specific year
             startMonth = (year - 1) * 12;
             endMonth = year * 12;
+            startMonthIndex = startMonth;
             displayData = data.slice(startMonth, endMonth);
-            
+
             let headerRow = '<tr><th>Category</th>';
             const startingMonth = config.startingMonth || 0;
             for (let i = 0; i < 12; i++) {
@@ -1052,8 +1057,8 @@
             { key: 'batteryDisposal', label: 'Battery Disposal' }
         ];
         
-        tableBody.innerHTML += generateTableSection(revenueItems, displayData, year, formatCurrency);
-        
+        tableBody.innerHTML += generateTableSection(revenueItems, displayData, year, formatCurrency, startMonthIndex);
+
         // Total Revenue
         let row = '<tr class="total-row"><td>Total Revenue</td>';
         let grandTotalRevenue = 0;
@@ -1090,8 +1095,8 @@
             { key: 'managerSalary', label: 'Manager' }
         ];
         
-        tableBody.innerHTML += generateTableSection(laborItems, displayData, year, formatCurrency);
-        
+        tableBody.innerHTML += generateTableSection(laborItems, displayData, year, formatCurrency, startMonthIndex);
+
         // Add Total Payroll row
         let totalPayrollRow = '<tr class="payroll-total-row"><td>Total Payroll</td>';
         if (year === 'summary') {
@@ -1118,8 +1123,8 @@
             { key: 'partsCost', label: 'Parts Cost' }
         ];
         
-        tableBody.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency);
-        
+        tableBody.innerHTML += generateTableSection(cogsItems, displayData, year, formatCurrency, startMonthIndex);
+
         // Payroll Taxes
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Payroll Taxes</strong></td><td colspan="13"></td></tr>';
         
@@ -1130,8 +1135,8 @@
             { key: 'futa', label: 'Federal Unemployment' }
         ];
         
-        tableBody.innerHTML += generateTableSection(payrollTaxItems, displayData, year, formatCurrency);
-        
+        tableBody.innerHTML += generateTableSection(payrollTaxItems, displayData, year, formatCurrency, startMonthIndex);
+
         // Operating Expenses
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Operating Expenses</strong></td><td colspan="13"></td></tr>';
         
@@ -1150,8 +1155,8 @@
             { key: 'aaaSignup', label: 'AAA Signup (Annual)' }
         ];
         
-        tableBody.innerHTML += generateTableSection(operatingExpenses, displayData, year, formatCurrency);
-        
+        tableBody.innerHTML += generateTableSection(operatingExpenses, displayData, year, formatCurrency, startMonthIndex);
+
         // Periodic Expenses
         tableBody.innerHTML += '<tr class="subcategory"><td><strong>Periodic Expenses</strong></td><td colspan="13"></td></tr>';
         
@@ -1160,8 +1165,8 @@
             { key: 'coolantDisposal', label: 'Waste Coolant Disposal (6mo)' }
         ];
         
-        tableBody.innerHTML += generateTableSection(equipmentItems, displayData, year, formatCurrency);
-        
+        tableBody.innerHTML += generateTableSection(equipmentItems, displayData, year, formatCurrency, startMonthIndex);
+
         // Total Expenses
         row = '<tr class="expense-total"><td>Total Expenses</td>';
         let grandTotalExpenses = 0;
@@ -1289,6 +1294,9 @@
         
         // Update summary cards
         updateSummaryCards(grandTotalRevenue, grandTotalExpenses, totalNetIncome);
+
+        // Attach tooltip handlers after table is generated
+        attachTooltipHandlers();
     }
 
     function updateSummaryCards(revenue, expenses, netIncome) {
@@ -1318,6 +1326,337 @@
                 <div class="value">${formatCurrency(avgMonthlyIncome)}</div>
             </div>
         `;
+    }
+
+    // ============= TOOLTIP MODULE =============
+    let tooltipElement = null;
+
+    function createTooltipElement() {
+        if (tooltipElement) return tooltipElement;
+
+        tooltipElement = document.createElement('div');
+        tooltipElement.className = 'calculation-tooltip';
+        document.body.appendChild(tooltipElement);
+        return tooltipElement;
+    }
+
+    function showTooltip(element, formula) {
+        if (!tooltipElement) createTooltipElement();
+
+        tooltipElement.innerHTML = formula;
+        tooltipElement.classList.add('visible');
+
+        // Position tooltip near cursor
+        const rect = element.getBoundingClientRect();
+        const tooltipRect = tooltipElement.getBoundingClientRect();
+
+        let left = rect.right + 10;
+        let top = rect.top;
+
+        // Keep tooltip on screen
+        if (left + tooltipRect.width > window.innerWidth) {
+            left = rect.left - tooltipRect.width - 10;
+        }
+        if (top + tooltipRect.height > window.innerHeight) {
+            top = window.innerHeight - tooltipRect.height - 10;
+        }
+        if (top < 0) top = 10;
+
+        tooltipElement.style.left = `${left}px`;
+        tooltipElement.style.top = `${top}px`;
+    }
+
+    function hideTooltip() {
+        if (tooltipElement) {
+            tooltipElement.classList.remove('visible');
+        }
+    }
+
+    function generateFormulaHTML(metric, value, monthData, config) {
+        const fmt = (val) => formatCurrency(val);
+        const pct = (val) => `${val.toFixed(1)}%`;
+        const num = (val) => val.toLocaleString();
+
+        switch(metric) {
+            case 'serviceRevenue':
+                const maxRev = config.laborRate * config.operatingHoursPerDay * config.workingDays;
+                const totalEff = monthData.efficiency * monthData.bays;
+                return `
+                    <div class="formula-title">Service Labor Revenue</div>
+                    <div class="formula-line">Labor Rate × Operating Hours × Working Days</div>
+                    <div class="formula-line">= $${config.laborRate}/hr × ${config.operatingHoursPerDay} hrs × ${config.workingDays} days</div>
+                    <div class="formula-line">= ${fmt(maxRev)} per 100% efficiency</div>
+                    <div class="formula-line">× (${totalEff.toFixed(1)}% total efficiency ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">${monthData.bays} bays @ ${pct(monthData.efficiency)} avg efficiency each</div>
+                `;
+
+            case 'partsRevenue':
+                return `
+                    <div class="formula-title">Parts Department Revenue</div>
+                    <div class="formula-line">Service Revenue × Parts Revenue %</div>
+                    <div class="formula-line">= ${fmt(monthData.serviceRevenue)} × ${config.partsRevenuePercent}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Parts sales are ${config.partsRevenuePercent}% of service revenue</div>
+                `;
+
+            case 'detailRevenue':
+                const maxDetailRev = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
+                const totalDetailEff = monthData.detailEfficiency * monthData.detailWorkers;
+                return `
+                    <div class="formula-title">Detail Department Revenue</div>
+                    <div class="formula-line">Charge Rate × Operating Hours × Working Days</div>
+                    <div class="formula-line">= $${config.detailChargeRate}/hr × ${config.operatingHoursPerDay} hrs × ${config.workingDays} days</div>
+                    <div class="formula-line">= ${fmt(maxDetailRev)} per 100% efficiency</div>
+                    <div class="formula-line">× (${totalDetailEff.toFixed(1)}% total efficiency ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">${monthData.detailWorkers} workers @ ${pct(monthData.detailEfficiency)} avg efficiency each</div>
+                `;
+
+            case 'shopCharge':
+                const woCharge = monthData.workOrders * config.shopChargeCap;
+                const pctCharge = monthData.serviceRevenue * (config.shopChargePercent / 100);
+                return `
+                    <div class="formula-title">Shop Charge</div>
+                    <div class="formula-line">Minimum of:</div>
+                    <div class="formula-line">1) ${num(monthData.workOrders)} work orders × ${fmt(config.shopChargeCap)} cap = ${fmt(woCharge)}</div>
+                    <div class="formula-line">2) ${fmt(monthData.serviceRevenue)} service revenue × ${config.shopChargePercent}% = ${fmt(pctCharge)}</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'warrantyRevenue':
+                const warCount = Math.floor(monthData.workOrders * (config.warrantyPercent / 100));
+                return `
+                    <div class="formula-title">Extended Warranties</div>
+                    <div class="formula-line">${num(monthData.workOrders)} work orders × ${config.warrantyPercent}% = ${warCount} warranties</div>
+                    <div class="formula-line">${warCount} warranties × ${fmt(config.warrantyPrice)} each</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'oilDisposal':
+                return `
+                    <div class="formula-title">Oil Disposal Revenue</div>
+                    <div class="formula-line">Base Fee × Efficiency Factor</div>
+                    <div class="formula-line">= ${fmt(config.oilDisposalFee)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Scales with shop efficiency</div>
+                `;
+
+            case 'disposalFees':
+                return `
+                    <div class="formula-title">General Disposal Fees</div>
+                    <div class="formula-line">Base Fee × Efficiency Factor</div>
+                    <div class="formula-line">= ${fmt(config.generalDisposalFee)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Scales with shop efficiency</div>
+                `;
+
+            case 'batteryDisposal':
+                return `
+                    <div class="formula-title">Battery Disposal Revenue</div>
+                    <div class="formula-line">Base Fee × Bays × Efficiency Factor</div>
+                    <div class="formula-line">= ${fmt(config.batteryDisposalFee)} × ${monthData.bays} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'usedCarSales':
+                return `
+                    <div class="formula-title">Used Car Sales</div>
+                    <div class="formula-line">Growing at ${config.usedCarGrowthPercent}% per month</div>
+                    <div class="formula-line">Base: ${config.initialUsedCars} cars × ${fmt(config.profitPerUsedCar)} profit</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Includes monthly multiplier adjustments</div>
+                `;
+
+            case 'techSalaries':
+                const seniorMonthly = config.seniorTechAnnualSalary / 12;
+                const juniorMonthly = config.juniorTechAnnualSalary / 12;
+                const bonusMonthly = config.techAnnualBonus / 12;
+                const juniorCount = monthData.techCount - 1;
+                return `
+                    <div class="formula-title">Technician Salaries + Bonuses</div>
+                    <div class="formula-line">1 Senior Tech: ${fmt(seniorMonthly)}/month</div>
+                    ${juniorCount > 0 ? `<div class="formula-line">${juniorCount} Junior Tech(s): ${juniorCount} × ${fmt(juniorMonthly)} = ${fmt(juniorCount * juniorMonthly)}</div>` : ''}
+                    <div class="formula-line">Bonuses: ${monthData.techCount} techs × ${fmt(bonusMonthly)} = ${fmt(monthData.techCount * bonusMonthly)}</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'detailSalaries':
+                const detailAnnual = config.detailHourlyWage * 8 * 21 * 12;
+                const detailMonthly = detailAnnual / 12;
+                return `
+                    <div class="formula-title">Detail Worker Salaries</div>
+                    <div class="formula-line">${monthData.detailWorkers} worker(s) × ${fmt(detailMonthly)}/month</div>
+                    <div class="formula-line">Based on $${config.detailHourlyWage}/hr × 8 hrs × 21 days</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'advisorSalary':
+                return `
+                    <div class="formula-title">Service Advisor Salary</div>
+                    <div class="formula-line">Annual: ${fmt(config.serviceAdvisorAnnualSalary)}</div>
+                    <div class="formula-line">Monthly: ${fmt(config.serviceAdvisorAnnualSalary)} ÷ 12</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'managerSalary':
+                return `
+                    <div class="formula-title">Manager Salary</div>
+                    <div class="formula-line">Annual: ${fmt(config.managerAnnualSalary)}</div>
+                    <div class="formula-line">Monthly: ${fmt(config.managerAnnualSalary)} ÷ 12</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'partsCost':
+                return `
+                    <div class="formula-title">Parts Cost (COGS)</div>
+                    <div class="formula-line">Parts Revenue × 50% cost ratio</div>
+                    <div class="formula-line">= ${fmt(monthData.partsRevenue)} × 50%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">50% markup on parts cost</div>
+                `;
+
+            case 'workersComp':
+                return `
+                    <div class="formula-title">Workers' Compensation</div>
+                    <div class="formula-line">Total Payroll × ${config.workersCompRate}%</div>
+                    <div class="formula-line">= ${fmt(monthData.totalPayroll)} × ${config.workersCompRate}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'socialSecurity':
+                return `
+                    <div class="formula-title">Social Security Tax</div>
+                    <div class="formula-line">6.2% on wages up to $${config.socialSecurityWageCap.toLocaleString()}/year per employee</div>
+                    <div class="formula-line">Calculated per employee with YTD tracking</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Caps applied individually per employee</div>
+                `;
+
+            case 'medicare':
+                return `
+                    <div class="formula-title">Medicare Tax</div>
+                    <div class="formula-line">Total Payroll × ${config.medicareRate}%</div>
+                    <div class="formula-line">= ${fmt(monthData.totalPayroll)} × ${config.medicareRate}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">No wage cap</div>
+                `;
+
+            case 'futa':
+                return `
+                    <div class="formula-title">Federal Unemployment Tax (FUTA)</div>
+                    <div class="formula-line">0.6% on first $${config.futaWageCap.toLocaleString()} per employee per year</div>
+                    <div class="formula-line">Calculated per employee with YTD tracking</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'advertising':
+                const totalRev = monthData.serviceRevenue + monthData.partsRevenue + monthData.detailRevenue +
+                               monthData.usedCarSales + monthData.shopCharge + monthData.warrantyRevenue +
+                               monthData.oilDisposal + monthData.disposalFees + monthData.batteryDisposal;
+                return `
+                    <div class="formula-title">Advertising Expense</div>
+                    <div class="formula-line">Total Revenue × ${config.advertisingPercent}%</div>
+                    <div class="formula-line">= ${fmt(totalRev)} × ${config.advertisingPercent}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'paymentProcessing':
+                if (config.paymentProcessFormula === 'percentPlusTransaction') {
+                    const pctFee = (monthData.serviceRevenue + monthData.partsRevenue + monthData.detailRevenue +
+                                   monthData.usedCarSales + monthData.shopCharge + monthData.warrantyRevenue +
+                                   monthData.oilDisposal + monthData.disposalFees + monthData.batteryDisposal) * config.paymentProcessingPercent / 100;
+                    const transFee = monthData.workOrders * config.paymentProcessingPerTransaction;
+                    return `
+                        <div class="formula-title">Payment Processing Fees</div>
+                        <div class="formula-line">Percent Fee: Total Revenue × ${config.paymentProcessingPercent}% = ${fmt(pctFee)}</div>
+                        <div class="formula-line">Transaction Fee: ${num(monthData.workOrders)} × $${config.paymentProcessingPerTransaction} = ${fmt(transFee)}</div>
+                        <div class="formula-result">= ${fmt(value)}</div>
+                    `;
+                }
+                return `
+                    <div class="formula-title">Payment Processing Fees</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                `;
+
+            case 'detailCommission':
+                const detailProfit = monthData.detailRevenue - monthData.detailSalaries - config.monthlyDetailSupplies;
+                return `
+                    <div class="formula-title">Detail Commission</div>
+                    <div class="formula-line">Detail Profit × ${config.detailCommissionPercent}%</div>
+                    <div class="formula-line">Profit = ${fmt(monthData.detailRevenue)} - ${fmt(monthData.detailSalaries)} - ${fmt(config.monthlyDetailSupplies)}</div>
+                    <div class="formula-line">= ${fmt(detailProfit)} × ${config.detailCommissionPercent}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Only paid on positive profit</div>
+                `;
+
+            case 'oilCosts':
+                return `
+                    <div class="formula-title">Oil Costs</div>
+                    <div class="formula-line">Cost per Lift × Efficiency Factor</div>
+                    <div class="formula-line">= ${fmt(config.monthlyOilCostPerLift)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Scales with shop efficiency</div>
+                `;
+
+            case 'shopSupplies':
+                return `
+                    <div class="formula-title">Shop Supplies/Misc</div>
+                    <div class="formula-line">Cost per Lift × Efficiency Factor</div>
+                    <div class="formula-line">= ${fmt(config.monthlyShopSuppliesPerLift)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Scales with shop efficiency</div>
+                `;
+
+            case 'federalIncomeTax':
+                return `
+                    <div class="formula-title">Federal Income Tax</div>
+                    <div class="formula-line">Income Before Tax × ${config.federalIncomeTaxRate}%</div>
+                    <div class="formula-line">= ${fmt(monthData.netIncomeBeforeTax)} × ${config.federalIncomeTaxRate}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Only applied to positive income</div>
+                `;
+
+            case 'wvStateTax':
+                return `
+                    <div class="formula-title">WV State Tax</div>
+                    <div class="formula-line">Income Before Tax × ${config.wvStateTaxRate}%</div>
+                    <div class="formula-line">= ${fmt(monthData.netIncomeBeforeTax)} × ${config.wvStateTaxRate}%</div>
+                    <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">Only applied to positive income</div>
+                `;
+
+            default:
+                return `
+                    <div class="formula-title">${metric}</div>
+                    <div class="formula-result">${fmt(value)}</div>
+                `;
+        }
+    }
+
+    function attachTooltipHandlers() {
+        // Remove existing handlers
+        document.querySelectorAll('.has-tooltip').forEach(el => {
+            const newEl = el.cloneNode(true);
+            el.parentNode.replaceChild(newEl, el);
+        });
+
+        // Attach new handlers
+        document.querySelectorAll('.has-tooltip').forEach(element => {
+            element.addEventListener('mouseenter', function(e) {
+                const metric = this.getAttribute('data-metric');
+                const monthIndex = parseInt(this.getAttribute('data-month'));
+                const value = parseFloat(this.getAttribute('data-value'));
+
+                if (metric && monthlyData[monthIndex]) {
+                    const config = getConfig();
+                    const formula = generateFormulaHTML(metric, value, monthlyData[monthIndex], config);
+                    showTooltip(this, formula);
+                }
+            });
+
+            element.addEventListener('mouseleave', hideTooltip);
+        });
     }
 
     // ============= MAIN APPLICATION =============
