@@ -638,6 +638,8 @@
                 techCount: techCount,
                 detailWorkers: currentDetailWorkers,
                 detailEfficiency: currentDetailEfficiency,
+                monthlyMultiplier: monthlyMultiplier,
+                calendarMonthIndex: calendarMonthIndex,
                 // Revenue
                 serviceRevenue: serviceRevenue,
                 partsRevenue: partsRevenue,
@@ -1377,18 +1379,27 @@
         const pct = (val) => `${val.toFixed(1)}%`;
         const num = (val) => val.toLocaleString();
 
+        // Helper to get month name
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        const getMonthName = (idx) => monthNames[idx] || 'Unknown';
+
         switch(metric) {
             case 'serviceRevenue':
                 const maxRev = config.laborRate * config.operatingHoursPerDay * config.workingDays;
                 const totalEff = monthData.efficiency * monthData.bays;
+                const multiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const monthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">Service Labor Revenue</div>
                     <div class="formula-line">Labor Rate × Operating Hours × Working Days</div>
                     <div class="formula-line">= $${config.laborRate}/hr × ${config.operatingHoursPerDay} hrs × ${config.workingDays} days</div>
                     <div class="formula-line">= ${fmt(maxRev)} per 100% efficiency</div>
                     <div class="formula-line">× (${totalEff.toFixed(1)}% total efficiency ÷ 100)</div>
+                    <div class="formula-line">× ${multiplierPct}% monthly multiplier</div>
                     <div class="formula-result">= ${fmt(value)}</div>
                     <div class="formula-note">${monthData.bays} bays @ ${pct(monthData.efficiency)} avg efficiency each</div>
+                    <div class="formula-note">${monthName} seasonal adjustment: ${multiplierPct}%</div>
                 `;
 
             case 'partsRevenue':
@@ -1403,14 +1414,18 @@
             case 'detailRevenue':
                 const maxDetailRev = config.detailChargeRate * config.operatingHoursPerDay * config.workingDays;
                 const totalDetailEff = monthData.detailEfficiency * monthData.detailWorkers;
+                const detailMultiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const detailMonthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">Detail Department Revenue</div>
                     <div class="formula-line">Charge Rate × Operating Hours × Working Days</div>
                     <div class="formula-line">= $${config.detailChargeRate}/hr × ${config.operatingHoursPerDay} hrs × ${config.workingDays} days</div>
                     <div class="formula-line">= ${fmt(maxDetailRev)} per 100% efficiency</div>
                     <div class="formula-line">× (${totalDetailEff.toFixed(1)}% total efficiency ÷ 100)</div>
+                    <div class="formula-line">× ${detailMultiplierPct}% monthly multiplier</div>
                     <div class="formula-result">= ${fmt(value)}</div>
                     <div class="formula-note">${monthData.detailWorkers} workers @ ${pct(monthData.detailEfficiency)} avg efficiency each</div>
+                    <div class="formula-note">${detailMonthName} seasonal adjustment: ${detailMultiplierPct}%</div>
                 `;
 
             case 'shopCharge':
@@ -1434,29 +1449,38 @@
                 `;
 
             case 'oilDisposal':
+                const oilMultiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const oilMonthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">Oil Disposal Revenue</div>
-                    <div class="formula-line">Base Fee × Efficiency Factor</div>
-                    <div class="formula-line">= ${fmt(config.oilDisposalFee)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-line">Base Fee × Efficiency Factor × Monthly Multiplier</div>
+                    <div class="formula-line">= ${fmt(config.oilDisposalFee)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100) × ${oilMultiplierPct}%</div>
                     <div class="formula-result">= ${fmt(value)}</div>
                     <div class="formula-note">Scales with shop efficiency</div>
+                    <div class="formula-note">${oilMonthName} seasonal adjustment: ${oilMultiplierPct}%</div>
                 `;
 
             case 'disposalFees':
+                const genMultiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const genMonthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">General Disposal Fees</div>
-                    <div class="formula-line">Base Fee × Efficiency Factor</div>
-                    <div class="formula-line">= ${fmt(config.generalDisposalFee)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-line">Base Fee × Efficiency Factor × Monthly Multiplier</div>
+                    <div class="formula-line">= ${fmt(config.generalDisposalFee)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100) × ${genMultiplierPct}%</div>
                     <div class="formula-result">= ${fmt(value)}</div>
                     <div class="formula-note">Scales with shop efficiency</div>
+                    <div class="formula-note">${genMonthName} seasonal adjustment: ${genMultiplierPct}%</div>
                 `;
 
             case 'batteryDisposal':
+                const batMultiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const batMonthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">Battery Disposal Revenue</div>
-                    <div class="formula-line">Base Fee × Bays × Efficiency Factor</div>
-                    <div class="formula-line">= ${fmt(config.batteryDisposalFee)} × ${monthData.bays} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-line">Base Fee × Bays × Efficiency Factor × Monthly Multiplier</div>
+                    <div class="formula-line">= ${fmt(config.batteryDisposalFee)} × ${monthData.bays} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100) × ${batMultiplierPct}%</div>
                     <div class="formula-result">= ${fmt(value)}</div>
+                    <div class="formula-note">${batMonthName} seasonal adjustment: ${batMultiplierPct}%</div>
                 `;
 
             case 'usedCarSales':
@@ -1591,21 +1615,27 @@
                 `;
 
             case 'oilCosts':
+                const oilCostMultiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const oilCostMonthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">Oil Costs</div>
-                    <div class="formula-line">Cost per Lift × Efficiency Factor</div>
-                    <div class="formula-line">= ${fmt(config.monthlyOilCostPerLift)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-line">Cost per Lift × Efficiency Factor × Monthly Multiplier</div>
+                    <div class="formula-line">= ${fmt(config.monthlyOilCostPerLift)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100) × ${oilCostMultiplierPct}%</div>
                     <div class="formula-result">= ${fmt(value)}</div>
                     <div class="formula-note">Scales with shop efficiency</div>
+                    <div class="formula-note">${oilCostMonthName} seasonal adjustment: ${oilCostMultiplierPct}%</div>
                 `;
 
             case 'shopSupplies':
+                const shopSuppliesMultiplierPct = (monthData.monthlyMultiplier * 100).toFixed(0);
+                const shopSuppliesMonthName = getMonthName(monthData.calendarMonthIndex);
                 return `
                     <div class="formula-title">Shop Supplies/Misc</div>
-                    <div class="formula-line">Cost per Lift × Efficiency Factor</div>
-                    <div class="formula-line">= ${fmt(config.monthlyShopSuppliesPerLift)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100)</div>
+                    <div class="formula-line">Cost per Lift × Efficiency Factor × Monthly Multiplier</div>
+                    <div class="formula-line">= ${fmt(config.monthlyShopSuppliesPerLift)} × (${(monthData.efficiency * monthData.bays).toFixed(1)}% ÷ 100) × ${shopSuppliesMultiplierPct}%</div>
                     <div class="formula-result">= ${fmt(value)}</div>
                     <div class="formula-note">Scales with shop efficiency</div>
+                    <div class="formula-note">${shopSuppliesMonthName} seasonal adjustment: ${shopSuppliesMultiplierPct}%</div>
                 `;
 
             case 'federalIncomeTax':
